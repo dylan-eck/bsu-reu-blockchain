@@ -60,8 +60,11 @@ if __name__ == '__main__':
 
     t1 = perf_counter()
 
+    time_period_days = 1
+
     end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
-    start_day = end_day - relativedelta(days=+1)
+    start_day = end_day - relativedelta(days=time_period_days)
+    
     days = get_days(start_day, end_day)
 
     print(f'collecting blocks:')
@@ -97,6 +100,12 @@ if __name__ == '__main__':
         input_dict[hash] = inputs
         output_dict[hash] = outputs
 
+        # for input in inputs:
+        #     if input in address_adj_list:
+        #         address_adj_list[input] += outputs
+        #     else:
+        #         address_adj_list[input] = outputs
+
     t2 = perf_counter()
 
     execution_time_m = (t2-t1) / 60
@@ -104,20 +113,20 @@ if __name__ == '__main__':
     print(f'\ncollected {len(transactions)} total transactions\n')
     print(f'execution time: {execution_time_m:.2f} minutes')
 
-    for i in range(5):
-        hash = transactions[i].get('hash')
+    # for i in range(5):
+    #     hash = transactions[i].get('hash')
 
-        inputs = input_dict.get(hash)
-        outputs = output_dict.get(hash)
+    #     inputs = input_dict.get(hash)
+    #     outputs = output_dict.get(hash)
 
-        print(f'transaction: {hash}\n')
+    #     print(f'transaction: {hash}\n')
 
-        print('inputs:')
-        for input in inputs:
-            print(f'    {input}')
-        print()
+    #     print('inputs:')
+    #     for input in inputs:
+    #         print(f'    {input}')
+    #     print()
 
-        print('outputs:')
-        for output in outputs:
-            print(f'    {output}')
-        print()
+    #     print('outputs:')
+    #     for output in outputs:
+    #         print(f'    {output}')
+    #     print()
