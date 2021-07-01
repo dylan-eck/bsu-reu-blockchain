@@ -16,6 +16,11 @@ def save_json(filepath, data):
         json.dump(data, output_file)
 
 def get_days(start_day,end_day):
+    """
+    inputs:     two datetime objects
+
+    returns:    datetime objects for every day from start_day up to, but not including end_day
+    """
     days = []
 
     current_day = start_day
@@ -26,6 +31,12 @@ def get_days(start_day,end_day):
     return days
 
 def get_block_summaries(day):
+    """
+    inputs:     a datetime object
+
+    returns:    basic information about each block added to the blockchain on the given day
+                including the block hash and block height
+    """
     timestamp = int(day.timestamp() * 1000)
 
     url = f'https://blockchain.info/blocks/{str(timestamp)}?format=json'
@@ -35,6 +46,12 @@ def get_block_summaries(day):
     return block_summaries
 
 def get_block(block_summary):
+    """
+    inputs:     a block summary dictionary (get_block_summaries() returns a list of these)
+
+    returns:    a dictionary containg all information related to the specifed block
+                including header information and a list of transactions contained within the block
+    """
     block_hash = block_summary.get('hash')
 
     url = f'https://blockchain.info/rawblock/{block_hash}'
