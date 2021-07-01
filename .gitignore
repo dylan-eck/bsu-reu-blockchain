@@ -2,3 +2,5 @@ __pycache__
 block_data
 *.csv
 test.py
+app.log
+
