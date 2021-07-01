@@ -63,11 +63,12 @@ def proccess_block(block_summary):
 
     for transaction in transactions:
         transaction_hash = transaction.get('hash')
+        transaction_fee = transaction.get('fee')
         inputs = get_inputs(transaction)
         outputs = get_outputs(transaction)
 
         if inputs and outputs:
-            transaction_list.append([transaction_hash, inputs, outputs])
+            transaction_list.append([transaction_hash, inputs, outputs, transaction_fee])
 
     return transaction_list
 
@@ -103,12 +104,13 @@ if __name__ == '__main__':
         print(f'\nwriting transactions to file\n')
 
         with open(f'transactions.csv', 'a', buffering=1000) as output_file:
-            output_file.write('transaction_hash,input_addreses,input_values,output_addresses,output_values\n')
+            output_file.write('transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee\n')
 
             for transaction in transaction_list:
                 hash = transaction[0]
                 inputs = transaction[1]
                 outputs = transaction[2]
+                fee = transaction[3]
 
                 input_addr_str = inputs[0][0]
                 input_val_str = str(inputs[0][1])
@@ -124,7 +126,7 @@ if __name__ == '__main__':
                     output_val_str += f':{outputs[i][1]}'
 
 
-                output_file.write(f'{hash},{input_addr_str},{input_val_str},{output_addr_str},{output_val_str}\n')
+                output_file.write(f'{hash},{input_addr_str},{input_val_str},{output_addr_str},{output_val_str},{fee}\n')
 
         day_end = perf_counter()
         day_time = (day_end-day_start)/60
