@@ -5,6 +5,7 @@ from dateutil import tz
 from dateutil.relativedelta import *
 import logging
 import json
+import os
 
 def load_json(filepath):
     with open(filepath, 'r') as fp:
@@ -45,14 +46,13 @@ def get_block_summaries(day):
     block_summaries = json.load(response)
     return block_summaries
 
-def get_block(block_summary):
+def get_block(block_hash):
     """
-    inputs:     a block summary dictionary (get_block_summaries() returns a list of these)
+    inputs:     a block hash
 
     returns:    a dictionary containg all information related to the specifed block
                 including header information and a list of transactions contained within the block
     """
-    block_hash = block_summary.get('hash')
 
     url = f'https://blockchain.info/rawblock/{block_hash}'
     response = urlopen(url)
@@ -62,64 +62,49 @@ def get_block(block_summary):
 
 if __name__ == '__main__':
 
-    logging.basicConfig(filename='app.log', filemode='w', format='[%(asctime)s] : %(message)s')
-
-    time_period_days = 90
-
+    # set start and end days
+    time_period_days = 1
     end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
     start_day = end_day - relativedelta(days=time_period_days)
     
     days = get_days(start_day, end_day)
 
-    success_count = 0
-    fail_count = 0
-    failed_dates = []
+    # create a directory to store the block json files
+    if not os.path.exists('block_data'):
+        os.mkdir('block_data')
 
     for day in days:
         day_string = day.strftime("%Y-%m-%d")
 
-        # print/log current date value
-        date_msg = "DATE: " + str(day_string)
-        print("\n" + date_msg)
-        logging.error(date_msg)
+        # create a sub-directory for each day to help keep things organized
+        if not os.path.exists(f'block_data/{day_string}'):
+            os.mkdir(f'block_data/{day_string}')
 
-        try:
-            block_summaries = get_block_summaries(day)
+        print(f'collecting blocks from {day_string}\n')
+        
+        block_summaries = get_block_summaries(day)
+        num_blocks = len(block_summaries)
 
-            for block in block_summaries:
-                block_data = get_block(block)
+        print(f'collected block summary file containing {num_blocks} blocks')
 
-                block_hash = block_data.get('hash')
+        file_name = f'block_data/{day_string}/blocks_{day_string}.json'
+        save_json(file_name,block_summaries)
 
-                # file format: <block hash>_<block day/time>.json
-                filename = str(block_hash) + "_" + str(day_string) + ".json"
+        n = 1
+        for block in block_summaries:
+            t1 = perf_counter()
+            block_hash = block.get('hash')
 
-                # print/log current HASH value for A date
-                hash_msg = "HASH SAVED: " + str(block_hash)
-                print(hash_msg)
-                logging.error(hash_msg)
+            block_data = get_block(block_hash)
 
-                save_json(filename, block_data)
+            filename = f'block_data/{day_string}/{block_hash}.json'
+            save_json(filename, block_data)
 
-            success_count = success_count + 1
-        except:
-            fail_count = fail_count + 1
-            failed_dates.append(day_string)
-
-            # print/log error
-            failed_msg = "ERROR - failed to load transactions for " + str(day_string)
-            print(failed_msg)
-            logging.error(failed_msg)
-    
-    print("\nRESULTS:")
-    print(" - success count:", success_count)
-    print(" - failure count:", fail_count)
-    print(" - failed dates: ")
-    for fdate in failed_dates:
-        print("    " + str(fdate))
-
-
-
+            t2 = perf_counter()
+            block_time = t2-t1 
+            print(f'collected block {block_hash} ({n}/{num_blocks}) in {block_time:.2f}s')
             
+            n += 1
 
 
+        print()
