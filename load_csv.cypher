@@ -1,4 +1,4 @@
-LOAD CSV WITH HEADERS FROM 'file:///test.csv' AS row
+LOAD CSV WITH HEADERS FROM 'file:///transactions.csv' AS row
 WITH row WHERE row.transaction_hash IS NOT NULL
 
 FOREACH(i IN SPLIT(row.input_addresses, ':') |
