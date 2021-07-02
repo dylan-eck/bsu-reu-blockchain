@@ -1,8 +1,11 @@
+from json import load
 from time import perf_counter
 from datetime import datetime
 from dateutil import tz
 from dateutil.relativedelta import *
+import json
 import os
+import re
 
 from functions import get_days, get_block_summaries, get_block, save_json, load_json
 
@@ -35,68 +38,97 @@ for day in days:
     day_start = perf_counter()
 
     day_string = day.strftime("%Y-%m-%d")
-
-    try:
-        # create a sub-directory for each day to help keep things organized
-        if not os.path.exists(f'block_data/{day_string}'):
-            os.mkdir(f'block_data/{day_string}')
-    except:
-        failed_days.add(day_string)
-
-        message = f'could not create directory for day {day_string}'
-        logging.critical(message)
-        raise
+    day_directory = f'block_data/{day_string}'
 
     logging.info(f'collecting blocks from {day_string}\n')
-    
-    try:
-        block_summaries = get_block_summaries(day)
 
-    except:
-        failed_days.add(day_string)
+    summary_file_exists = False
 
-        logging.error(f'failed to load block summaries for {day_string}')
+    # create a sub-directory for each day to help keep things organized
+    if os.path.exists(day_directory):
+        logging.debug(f'found pre-existing sub-directory for {day_string}')
+
+        # check to see if block summaries have already been collected for this day
+        sfile_name_pattern = re.compile("^blocks*")
+        for file in os.listdir(day_directory):
+            if sfile_name_pattern.match(file):
+                summary_file_exists = True      
 
     else:
+        try:
+            os.mkdir(day_directory)
+        except:
+            failed_days.add(day_string)
+
+            message = f'could not create directory for day {day_string}'
+            logging.critical(message)
+            raise
+    
+    if summary_file_exists:
+        block_summaries = load_json(f'{day_directory}/blocks_{day_string}.json')
         num_blocks = len(block_summaries)
+        logging.debug(f'found pre-exisiting block summary file for {day_string} containing {num_blocks} blocks')
 
-        logging.info(f'collected block summary file containing {num_blocks} blocks')
+    else:
+        try:
+            block_summaries = get_block_summaries(day)
+            num_blocks = len(block_summaries)
 
-        file_name = f'block_data/{day_string}/blocks_{day_string}.json'
-        save_json(file_name,block_summaries)
+            logging.info(f'collected block summary file containing {num_blocks} blocks')
 
-        n = 1
-        for block in block_summaries:
-            block_start = perf_counter()
+            file_name = f'block_data/{day_string}/blocks_{day_string}.json'
+            save_json(file_name,block_summaries)
+
+        except:
+            failed_days.add(day_string)
+            logging.error(f'failed to load block summaries for {day_string}')
             
-            block_hash = block.get('hash')
+            continue
 
-            try:
-                block_data = get_block(block_hash)
+    n = 1
+    for block in block_summaries:
+        block_start = perf_counter()
+        
+        block_hash = block.get('hash')
 
-            except:
+        # check to see if block has already been downloaded
+        block_exists = False
+        for file in os.listdir(day_directory):
+            if file == f'{block_hash}.json':
+                block_exists = True
+                logging.info(f'block {block_hash} already collected')
+                break
 
-                if day_string in failed_blocks:
-                    failed_blocks[day_string].add(block_hash)
-                
-                else:
-                    failed_blocks[day_string] = {block_hash}
+        if block_exists:
+            continue
 
-                logging.error(f'failed to load block {block_hash}')
+        try:
+            block_data = get_block(block_hash)
 
+        except:
+
+            if day_string in failed_blocks:
+                failed_blocks[day_string].add(block_hash)
+            
             else:
-                filename = f'block_data/{day_string}/{block_hash}.json'
-                save_json(filename, block_data)
+                failed_blocks[day_string] = {block_hash}
 
-                block_end = perf_counter()
-                block_time = block_end-block_start
-                logging.info(f'collected block {block_hash} ({n}/{num_blocks}) - block processing time: {block_time:.2f}s')
-                
-                n += 1
+            logging.error(f'failed to load block {block_hash}')
 
-        day_end = perf_counter()
-        day_tiem = (day_end-day_start)/60
-        logging.info(f'collected {num_blocks} blocks from {day_string} - day processing time: {block_time:.2f} minutes\n')
+            continue
+
+        filename = f'block_data/{day_string}/{block_hash}.json'
+        save_json(filename, block_data)
+
+        block_end = perf_counter()
+        block_time = block_end-block_start
+        logging.info(f'collected block {block_hash} ({n}/{num_blocks}) - block processing time: {block_time:.2f}s')
+        
+        n += 1
+
+    day_end = perf_counter()
+    day_time = (day_end-day_start)/60
+    logging.info(f'collected {num_blocks} blocks from {day_string} - day processing time: {day_time:.2f} minutes\n')
 
 # report errors that occured
 
@@ -124,6 +156,3 @@ logging.error(failed_blocks_message)
 program_end = perf_counter()
 execution_time = (program_end-program_start)/60/60
 logging.info(f'execution finished in {execution_time:.2f} hours\n')
-
-
-
