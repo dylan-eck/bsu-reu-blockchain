@@ -2,21 +2,27 @@ from time import perf_counter
 from datetime import datetime
 from dateutil import tz
 from dateutil.relativedelta import *
+import logging
 import os
 import re
 
 from functions import get_days, get_block_summaries, get_block, save_json, load_json
 
 # configure logging
-import logging
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
 logging.basicConfig(filename='logs/app.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
 
 program_start = perf_counter()
 
 # set start and end days, and create datetime objects for all days in range
-time_period_days = 75
-end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
-start_day = end_day - relativedelta(days=time_period_days)
+# time_period_days = 90
+# end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
+# start_day = end_day - relativedelta(days=time_period_days)
+
+start_day = datetime(year=2021, month=4, day=30, tzinfo = tz.gettz('Etc/GMT'))
+end_day = datetime(year=2021, month=5, day=31, tzinfo = tz.gettz('Etc/GMT'))
 
 days = get_days(start_day, end_day)
 
@@ -31,7 +37,7 @@ except:
 
 # used to keep track of errors that occur
 failed_days = set()
-failed_blocks = set()
+failed_blocks = {}
 
 for day in days:
     day_start = perf_counter()
