@@ -1,9 +1,7 @@
-from json import load
 from time import perf_counter
 from datetime import datetime
 from dateutil import tz
 from dateutil.relativedelta import *
-import json
 import os
 import re
 
@@ -15,7 +13,7 @@ logging.basicConfig(filename='logs/app.log',filemode='w',format='%(asctime)s - %
 
 program_start = perf_counter()
 
-# set start and end days
+# set start and end days, and create datetime objects for all days in range
 time_period_days = 75
 end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
 start_day = end_day - relativedelta(days=time_period_days)
@@ -31,6 +29,7 @@ except:
     logging.critical(message)
     raise
 
+# used to keep track of errors that occur
 failed_days = set()
 failed_blocks = set()
 
@@ -64,6 +63,8 @@ for day in days:
             logging.critical(message)
             raise
     
+    # collect block summaries for the current day
+    # either from the blockchain.com data api, or a local file, if one exists
     if summary_file_exists:
         block_summaries = load_json(f'{day_directory}/blocks_{day_string}.json')
         num_blocks = len(block_summaries)
@@ -85,18 +86,21 @@ for day in days:
             
             continue
 
-    n = 1
+    # colllect all blocks added on the current day
+    # either from the blockchain.com data api, or a local file, if one exists
+    current_block_num = 1
     for block in block_summaries:
         block_start = perf_counter()
         
         block_hash = block.get('hash')
 
-        # check to see if block has already been downloaded
+        # check to see if the block already exists locally
         block_exists = False
         for file in os.listdir(day_directory):
             if file == f'{block_hash}.json':
                 block_exists = True
-                logging.info(f'block {block_hash} already collected')
+                logging.info(f'block {block_hash} ({current_block_num}/{num_blocks}) already collected')
+                current_block_num += 1
                 break
 
         if block_exists:
@@ -106,7 +110,6 @@ for day in days:
             block_data = get_block(block_hash)
 
         except:
-
             if day_string in failed_blocks:
                 failed_blocks[day_string].add(block_hash)
             
@@ -114,7 +117,6 @@ for day in days:
                 failed_blocks[day_string] = {block_hash}
 
             logging.error(f'failed to load block {block_hash}')
-
             continue
 
         filename = f'block_data/{day_string}/{block_hash}.json'
@@ -122,9 +124,8 @@ for day in days:
 
         block_end = perf_counter()
         block_time = block_end-block_start
-        logging.info(f'collected block {block_hash} ({n}/{num_blocks}) - block processing time: {block_time:.2f}s')
-        
-        n += 1
+        logging.info(f'collected block {block_hash} ({current_block_num}/{num_blocks}) - block processing time: {block_time:.2f}s')
+        current_block_num += 1
 
     day_end = perf_counter()
     day_time = (day_end-day_start)/60
