@@ -8,7 +8,7 @@ from functions import get_days, get_block_summaries, get_block, save_json, load_
 
 # configure logging
 import logging
-logging.basicConfig(filename='app.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='logs/app.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
 
 # set start and end days
 time_period_days = 75
@@ -83,13 +83,13 @@ for day in days:
 
                 block_end = perf_counter()
                 block_time = block_end-block_start
-                logging.info(f'collected block {block_hash} ({n}/{num_blocks}) - processing time: {block_time:.2f}s')
+                logging.info(f'collected block {block_hash} ({n}/{num_blocks}) - block processing time: {block_time:.2f}s')
                 
                 n += 1
 
         day_end = perf_counter()
         day_tiem = (day_end-day_start)/60
-        logging.info(f'\n collected {num_blocks} blocks from {day_string} - processing time: {block_time:.2f}\n')
+        logging.info(f'collected {num_blocks} blocks from {day_string} - day processing time: {block_time:.2f}\n')
 
 
 

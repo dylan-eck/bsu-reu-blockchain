@@ -1,6 +1,6 @@
 __pycache__
 block_data
-*.csv
+csv_files
+logs
+deprecated
 test.py
-app.log
-
