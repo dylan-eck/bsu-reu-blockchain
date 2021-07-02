@@ -10,6 +10,8 @@ from functions import get_days, get_block_summaries, get_block, save_json, load_
 import logging
 logging.basicConfig(filename='logs/app.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
 
+program_start = perf_counter()
+
 # set start and end days
 time_period_days = 75
 end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
@@ -73,7 +75,12 @@ for day in days:
                 block_data = get_block(block_hash)
 
             except:
-                block_string = f'{block_hash}_{day_string}'
+
+                if day_string in failed_blocks:
+                    failed_blocks[day_string].add(block_hash)
+                
+                else:
+                    failed_blocks[day_string] = {block_hash}
 
                 logging.error(f'failed to load block {block_hash}')
 
@@ -89,7 +96,34 @@ for day in days:
 
         day_end = perf_counter()
         day_tiem = (day_end-day_start)/60
-        logging.info(f'collected {num_blocks} blocks from {day_string} - day processing time: {block_time:.2f}\n')
+        logging.info(f'collected {num_blocks} blocks from {day_string} - day processing time: {block_time:.2f} minutes\n')
+
+# report errors that occured
+
+num_failed_days = len(failed_days)
+failed_days_message = f'blocks for the following {num_failed_days} days could not be retrieved:\n\n'
+
+for day in failed_days:
+    failed_days_message += f'    {day}\n'
+failed_days_message += '\n'
+
+logging.error(failed_days_message)
+
+num_failed_blocks = len(failed_blocks)
+failed_blocks_message = f'the following {num_failed_blocks} individual blocks could not be retrieved:\n\n'
+
+for day in failed_blocks:
+    failed_blocks_message += f'    {day}\n'
+
+    for hash in failed_blocks.get(day):
+        failed_blocks_message += f'        {hash}\n'
+failed_blocks_message += '\n'
+
+logging.error(failed_blocks_message)
+
+program_end = perf_counter()
+execution_time = (program_end-program_start)/60/60
+logging.info(f'execution finished in {execution_time:.2f} hours\n')
 
 
 
