@@ -14,7 +14,7 @@ def get_days(start_day,end_day):
     days = []
 
     current_day = start_day
-    while current_day < end_day:
+    while current_day <= end_day:
         days.append(current_day)
         current_day += relativedelta(days=+1)
 
