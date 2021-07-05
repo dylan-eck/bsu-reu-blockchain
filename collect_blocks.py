@@ -21,8 +21,8 @@ program_start = perf_counter()
 # end_day = datetime(year=2021, month=6, day=28, tzinfo = tz.gettz('Etc/GMT'))
 # start_day = end_day - relativedelta(days=time_period_days)
 
-start_day = datetime(year=2021, month=4, day=30, tzinfo = tz.gettz('Etc/GMT'))
-end_day = datetime(year=2021, month=5, day=31, tzinfo = tz.gettz('Etc/GMT'))
+start_day = datetime(year=2021, month=5, day=30, tzinfo = tz.gettz('Etc/GMT'))
+end_day = datetime(year=2021, month=6, day=30, tzinfo = tz.gettz('Etc/GMT'))
 
 days = get_days(start_day, end_day)
 

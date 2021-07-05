@@ -94,18 +94,29 @@ for file_path in block_file_paths:
         block_hash = block.get('hash')
         transactions += get_tx_data(block)
         
-        print(f'loaded block {block_hash}')
+        print(f'loaded file {file_path}')
 
         if(len(transactions) > 1000000):
-            print('writing csv file')
             file_name = f'transactions_{file_number}.csv'
             if os.path.exists(f'csv_files/{file_name}'):
-                 os.remove(f'csv_files/{file_name}')
-
+                os.remove(f'csv_files/{file_name}')
+            print(f'writing csv file {file_number}')
             write_csv(f'csv_files/{file_name}', transactions)
-            transactions = []
             file_number += 1
-            
+            print('flushing transactions')
+            transactions = []
+
+print('finished main loop')
+
+if len(transactions) > 0:
+    print(f'writing csv file {file_number}')
+    file_name = f'transactions_{file_number}.csv'
+    if os.path.exists(f'csv_files/{file_name}'):
+            os.remove(f'csv_files/{file_name}')
+
+    write_csv(f'csv_files/{file_name}', transactions)
+    transactions = []
+    file_number += 1
 
 t2 = perf_counter()
 print(f'execution time {t2-t1:.2f}s')
