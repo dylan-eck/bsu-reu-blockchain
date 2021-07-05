@@ -1,6 +1,8 @@
 import json
 import os
 import re
+from time import perf_counter
+import csv
 
 def get_inputs(transaction):
     inputs = []
@@ -35,13 +37,41 @@ def get_tx_data(block):
     for transaction in transactions:
         transaction_hash = transaction.get('hash')
         transaction_fee = transaction.get('fee')
+
         inputs = get_inputs(transaction)
         outputs = get_outputs(transaction)
 
         if inputs and outputs:
-            transaction_data.append([transaction_hash, inputs, outputs, transaction_fee])
+
+            input_addr_str = ''
+            input_val_str = ''
+            for input in inputs:
+                if not None in input:
+                    input_addr_str += f'{input[0]}:'
+                    input_val_str += f'{input[1]}:'
+            input_addr_str = input_addr_str[:-1]
+            input_val_str = input_val_str[:-1]
+
+            output_addr_str = ''
+            output_val_str = ''
+            for output in outputs:
+                if not None in output:
+                    output_addr_str += f'{output[0]}:'
+                    output_val_str += f'{output[1]}:'
+            output_addr_str = output_addr_str[:-1]
+            output_val_str = output_val_str[:-1]
+
+            transaction_data.append([transaction_hash, input_addr_str, input_val_str, output_addr_str, output_val_str, transaction_fee])
 
     return transaction_data
+
+def write_csv(file_name, data):
+    with open(file_name, 'w') as output_file:
+        writer = csv.writer(output_file)
+        writer.writerows(data)
+
+if not os.path.exists('csv_files'):
+    os.mkdir('csv_files')
 
 block_data_directory = 'block_data/'
 block_file_paths = []
@@ -53,47 +83,36 @@ for (root, dirs, files) in os.walk(block_data_directory):
             file_path = os.path.join(root, file)
             block_file_paths.append(file_path)
 
-num_transactions = 0
+t1 = perf_counter()
 
+transactions = [['transaction_hash','input_addresses','input_values','output_addresses','output_values','transaction_fee']]
+
+file_number = 0
 for file_path in block_file_paths:
     with open(file_path) as input_file:
         block = json.load(input_file)
         block_hash = block.get('hash')
-        transaction_data = get_tx_data(block)
-        num_transactions += len(transaction_data)
-        input_file.close()
+        transactions += get_tx_data(block)
         
         print(f'loaded block {block_hash}')
 
-print(num_transactions)
+        if(len(transactions) > 1000000):
+            print('writing csv file')
+            file_name = f'transactions_{file_number}.csv'
+            if os.path.exists(f'csv_files/{file_name}'):
+                 os.remove(f'csv_files/{file_name}')
 
-# if not os.path.exists('csv_files'):
-#     os.mkdir('csv_files')
+            write_csv(f'csv_files/{file_name}', transactions)
+            transactions = []
+            file_number += 1
+            
 
-# with open('csv_files/transactions.csv', 'a', buffering=1000) as output_file:
-#     output_file.write('transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee\n')
-
-#     for transaction in transaction_data:
-#         hash = transaction[0]
-#         inputs = transaction[1]
-#         outputs = transaction[2]
-#         fee = transaction[3]
-
-#         input_addr_str = inputs[0][0]
-#         input_val_str = str(inputs[0][1])
-#         for i in range(1,len(inputs)):
-#             input_addr_str += f':{inputs[i][0]}'
-#             input_val_str += f':{inputs[i][1]}'
+t2 = perf_counter()
+print(f'execution time {t2-t1:.2f}s')
 
 
-#         output_addr_str = outputs[0][0]
-#         output_val_str = str(outputs[0][1])
-#         for i in range(1,len(outputs)):
-#             output_addr_str += f':{outputs[i][0]}'
-#             output_val_str += f':{outputs[i][1]}'
 
 
-#         output_file.write(f'{hash},{input_addr_str},{input_val_str},{output_addr_str},{output_val_str},{fee}\n')
 
 
 
