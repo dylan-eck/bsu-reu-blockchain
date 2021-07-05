@@ -1,8 +1,6 @@
 import json
 import os
-import re
 from time import perf_counter
-import csv
 
 from functions import get_tx_data, get_block_file_paths, write_csv
 
