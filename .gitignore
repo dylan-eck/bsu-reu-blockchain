@@ -1,6 +1,8 @@
 __pycache__
 block_data
 csv_files
+csv_files.zip
 logs
 deprecated
 test.py
+.DS_store
