@@ -120,17 +120,3 @@ if len(transactions) > 0:
 
 t2 = perf_counter()
 print(f'execution time {t2-t1:.2f}s')
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
