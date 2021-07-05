@@ -70,18 +70,23 @@ def write_csv(file_name, data):
         writer = csv.writer(output_file)
         writer.writerows(data)
 
+def get_block_file_paths(directory):
+    block_file_paths = []
+
+    for (root, dirs, files) in os.walk(block_data_directory):
+        for file in files:
+            pattern = re.compile("^[a-z0-9]{64}.json$")
+            if pattern.match(file):
+                file_path = os.path.join(root, file)
+                block_file_paths.append(file_path)
+
+    return block_file_paths
+
 if not os.path.exists('csv_files'):
     os.mkdir('csv_files')
 
 block_data_directory = 'block_data/'
-block_file_paths = []
-
-for (root, dirs, files) in os.walk(block_data_directory):
-    for file in files:
-        pattern = re.compile("^[a-z0-9]{64}.json$")
-        if pattern.match(file):
-            file_path = os.path.join(root, file)
-            block_file_paths.append(file_path)
+block_file_paths = get_block_file_paths(block_data_directory)
 
 t1 = perf_counter()
 
