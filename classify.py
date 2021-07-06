@@ -26,6 +26,7 @@ def read_transaction(line):
 
 t1 = perf_counter()
 
+print('locating csv files\n')
 csv_file_paths = []
 for (root, dirs, files) in os.walk('csv_files'):
         for file in files:
@@ -35,9 +36,12 @@ for (root, dirs, files) in os.walk('csv_files'):
                 csv_file_paths.append(file_path)
 csv_file_paths = csv_file_paths[1:2]
 
-in_out_upper_limit = 10
+print('loading transactions')
+in_out_upper_limit = 11
 mtm_transactions = []
 total_transactions = 0
+num_files = len(csv_file_paths)
+current_file = 1
 for file_path in csv_file_paths:
     with open(file_path, 'r') as input_file:
         input_file.readline()
@@ -51,12 +55,19 @@ for file_path in csv_file_paths:
                 mtm_transactions.append(transaction)
             
             total_transactions += 1
+        print(f'proccessed file {file_path} ({current_file}/{num_files})')
+        current_file += 1
+
+print('\nclassifying transactions')
 
 total_mtm= len(mtm_transactions)
 num_simple = total_transactions - total_mtm
 num_separable = 0
 num_ambiguous = 0
+current_transaction = 1
 for transaction in mtm_transactions:
+    t_start = perf_counter()
+
     transaction_hash = transaction[0]
     input_addrs = transaction[1]
     input_vals = transaction[2]
@@ -104,6 +115,13 @@ for transaction in mtm_transactions:
     else:
         num_simple += 1
 
+    num_inputs = len(input_addrs)
+    num_outputs = len(output_addrs)
+    t_finish = perf_counter()
+    print(f'classified transaction {transaction_hash} ({num_inputs}:{num_outputs}) ({current_transaction:,}/{total_mtm:,}) time: {t_finish-t_start:.2f}s')
+    current_transaction += 1
+
+print()
 
 percent_simple = (num_simple / total_transactions) * 100
 percent_separable = (num_separable / total_transactions) * 100
