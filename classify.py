@@ -84,41 +84,50 @@ for transaction in mtm_transactions:
         output_sets += list(combinations(output_vals,i))
 
     num_connectable_sets = 0
-    num_nonconnectable_sets = 0
 
-    adj_list = dict()
+    in_adj_list = dict()
+    out_adj_list = dict()
     for output_set in output_sets:
         for input_set in input_sets:
             if connectable(input_set,output_set,fee):
                 num_connectable_sets += 1
-                if output_set in adj_list:
-                    adj_list[output_set].append(input_set)
+                if output_set in out_adj_list:
+                    out_adj_list[output_set].append(input_set)
                 else:
-                    adj_list[output_set] = [input_set]
-            else:
-                num_nonconnectable_sets += 1
+                    out_adj_list[output_set] = [input_set]
 
-    total_sets = num_connectable_sets + num_nonconnectable_sets
+                if input_set in in_adj_list:
+                    in_adj_list[input_set].append(output_set)
+                else:
+                    in_adj_list[input_set] = [output_set]
 
     if num_connectable_sets > 2:
         ambiguous = False
-        for output_set in adj_list:
-            input_sets = adj_list[output_set]
+        for input_set in in_adj_list:
+            output_sets = in_adj_list[input_set]
+            if len(input_sets) > 1:
+                ambiguous = True
+
+        for output_set in out_adj_list:
+            input_sets = out_adj_list[output_set]
             if len(input_sets) > 1:
                 ambiguous = True
 
         if ambiguous:
+            type = 'ambiguous'
             num_ambiguous += 1
         else:
+            type = 'separable?'
             num_separable += 1
 
     else:
+        type = 'simple'
         num_simple += 1
 
     num_inputs = len(input_addrs)
     num_outputs = len(output_addrs)
     t_finish = perf_counter()
-    print(f'classified transaction {transaction_hash} ({num_inputs}:{num_outputs}) ({current_transaction:,}/{total_mtm:,}) time: {t_finish-t_start:.2f}s')
+    print(f'classified transaction {transaction_hash} cardinality: {num_inputs:3}:{num_outputs:<3} type: {type:10} #: {current_transaction:8,}/{total_mtm:<8,} time: {t_finish-t_start:4.2e}s')
     current_transaction += 1
 
 print()
@@ -130,7 +139,7 @@ percent_ambiguous = (num_ambiguous / total_transactions) * 100
 t2 = perf_counter()
 
 print(f'total transactions: {total_transactions:,}')
-print(f'    simple: {num_simple:,} ({percent_simple:.2f}%)')
-print(f'    separable?: {num_separable:,} ({percent_separable:.2f}%)')
-print(f'    ambiguous: {num_ambiguous:,} ({percent_ambiguous:.2f}%)')
-print(f'\nexecution time: {t2-t1:.2f}s')
+print(f'            simple: {num_simple:,} ({percent_simple:.2f}%)')
+print(f'        separable?: {num_separable:,} ({percent_separable:.2f}%)')
+print(f'         ambiguous: {num_ambiguous:,} ({percent_ambiguous:.2f}%)')
+print(f'\n  execution time: {(t2-t1):.2f} minutes')
