@@ -117,7 +117,7 @@ for transaction in mtm_transactions:
             type = 'ambiguous'
             num_ambiguous += 1
         else:
-            type = 'separable?'
+            type = 'separable'
             num_separable += 1
 
     else:
@@ -140,6 +140,6 @@ t2 = perf_counter()
 
 print(f'total transactions: {total_transactions:,}')
 print(f'            simple: {num_simple:,} ({percent_simple:.2f}%)')
-print(f'        separable?: {num_separable:,} ({percent_separable:.2f}%)')
+print(f'         separable: {num_separable:,} ({percent_separable:.2f}%)')
 print(f'         ambiguous: {num_ambiguous:,} ({percent_ambiguous:.2f}%)')
-print(f'\n  execution time: {(t2-t1):.2f} minutes')
+print(f'\n    execution time: {(t2-t1)/60:.2f} minutes')
