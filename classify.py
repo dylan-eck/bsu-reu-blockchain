@@ -59,8 +59,7 @@ for file_path in csv_file_paths:
         print(f'proccessed file {file_path} ({current_file}/{num_files})')
         current_file += 1
 
-transactions = transactions[:10000]
-
+ir_start = perf_counter()
 print('removing small inputs')
 num_affected_txs = 0
 total_inputs_removed = 0
@@ -80,10 +79,9 @@ for transaction in transactions:
 
         old_cardinality = f'{old_num_inputs:>3}:{old_num_outputs:<3}'
         new_cardinality = f'{new_num_inputs:>3}:{new_num_outputs:<3}'
-        print(f'removed {change:^3} small inputs from transaction {transaction[0]} old cardinality: {old_cardinality} new cardinality: {new_cardinality}')
-print(f'removed {total_inputs_removed:,} total inputs form {num_affected_txs:,} total transactions')
-
-
+        print(f'removed {change:3} small inputs from transaction {transaction[0]} old cardinality: {old_cardinality} new cardinality: {new_cardinality}')
+ir_end = perf_counter()
+print(f'removed {total_inputs_removed:,} inputs smaller than the transaction fee from {num_affected_txs:,} transactions time {(ir_end-ir_start)/60:.2f} minutes')
 
 # print('\nclassifying transactions')
 
