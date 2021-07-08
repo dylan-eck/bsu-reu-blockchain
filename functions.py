@@ -62,8 +62,12 @@ def get_inputs(transaction):
         if prev_out is not None:
             addr = prev_out.get('addr')
             value = prev_out.get('value')
-            inputs.append([addr, value]) 
-    
+        else:
+            addr = 'coinbase'
+            value = ''
+
+        inputs.append([addr, value]) 
+
     return inputs
 
 def get_outputs(transaction):

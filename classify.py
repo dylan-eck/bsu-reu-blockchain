@@ -27,15 +27,66 @@ def read_transaction(line):
 
     return [transaction_hash, inputs, outputs, transaction_fee]
 
+def sort_key(input):
+    return input[1]
+
 def remove_small_inputs(inputs, transaction_fee):
+    inputs.sort(key=sort_key,reverse=True)
     for (address, value) in inputs:
         if value < transaction_fee:
             inputs.remove((address, value))
-    return inputs
+            transaction_fee -= value
+    return (inputs, transaction_fee)
+
+def is_large(transaction):
+    if len(transaction[1]) > 5 or len(transaction[2]) > 5:
+        return True
+    else:
+        return False
+
+def get_codewords(n):
+	k = n
+	codewords = []
+	codeword = [1 for _ in range(0, n)]
+	while True:
+		codewords.append(codeword.copy())
+		startIndex = n - 1
+		while startIndex >= 0:
+			if not codeword[0 : startIndex]:
+				return codewords
+			else:
+				maxValue = max(codeword[0 : startIndex])
+				codewordAtStartIndex = codeword[startIndex]
+				if maxValue > k or codewordAtStartIndex > maxValue or codewordAtStartIndex >= k:
+					codeword[startIndex] = 1
+					startIndex -= 1
+				else:
+					codeword[startIndex] += 1
+					break
+
+def get_partitions(list):
+	n = len(list)
+	codewords = get_codewords(n)
+
+	partitions = []
+	for codeword in codewords:
+		partition = []
+		num_subsets = max(codeword)
+		for i in range(num_subsets):
+			partition.append([])
+
+		for i in range(len(codeword)):
+			element = list[i]
+			subset = codeword[i]
+			partition[subset-1].append(element)
+		
+		partitions.append(partition)
+	return partitions
 
 t1 = perf_counter()
 
-print('locating csv files\n')
+# --- locate csv files ---
+print('locating csv files')
 csv_file_paths = []
 for (root, dirs, files) in os.walk('csv_files'):
         for file in files:
@@ -45,7 +96,8 @@ for (root, dirs, files) in os.walk('csv_files'):
                 csv_file_paths.append(file_path)
 csv_file_paths = csv_file_paths[1:2]
 
-print('loading transactions')
+# --- load transactions ---
+print('\nloading transactions')
 transactions = []
 num_files = len(csv_file_paths)
 current_file = 1
@@ -59,15 +111,26 @@ for file_path in csv_file_paths:
         print(f'proccessed file {file_path} ({current_file}/{num_files})')
         current_file += 1
 
+transactions = transactions[:10000]
+# -- remove transactions with large numbers of inputs or outputs
+
+print('\nremoving large transactions')
+transactions = [transaction for transaction in transactions if not is_large(transaction)]
+
+# --- remove small inputs ---
 ir_start = perf_counter()
-print('removing small inputs')
+print('\nremoving small inputs')
 num_affected_txs = 0
 total_inputs_removed = 0
 for transaction in transactions:
     old_num_inputs = len(transaction[1])
     old_num_outputs = len(transaction[2])
+    old_fee = transaction[3]
 
-    transaction[1] = remove_small_inputs(transaction[1],transaction[3])
+    res = remove_small_inputs(transaction[1],transaction[3])
+    transaction[1] = res[0]
+    transaction[3] = res[1]
+    new_fee = transaction[3]
 
     new_num_inputs = len(transaction[1])
     new_num_outputs = len(transaction[2])
@@ -79,9 +142,63 @@ for transaction in transactions:
 
         old_cardinality = f'{old_num_inputs:>3}:{old_num_outputs:<3}'
         new_cardinality = f'{new_num_inputs:>3}:{new_num_outputs:<3}'
-        print(f'removed {change:3} small inputs from transaction {transaction[0]} old cardinality: {old_cardinality} new cardinality: {new_cardinality}')
+
+        temp = 'input' if change == 1 else 'inputs'
+        print(f'removed {change:3} small {temp} from transaction {transaction[0]}')
+        print(f'    old cardinality: {old_cardinality} new cardinality: {new_cardinality}')
+        print(f'            old fee: {old_fee:^7,}         new fee: {new_fee:^7,}\n')
 ir_end = perf_counter()
-print(f'removed {total_inputs_removed:,} inputs smaller than the transaction fee from {num_affected_txs:,} transactions time {(ir_end-ir_start)/60:.2f} minutes')
+print(f'removed {total_inputs_removed:,} small inputs from {num_affected_txs:,} transactions time: {(ir_end-ir_start)/60:.2f} minutes')
+
+def acceptable(input_partition,output_partition,fee):
+    acceptable = True
+    for in_subset in input_partition:
+        for out_subset in output_partition:
+            if not connectable(in_subset,out_subset,fee):
+                acceptable = False
+    return acceptable
+
+def group_by_size(partitions):
+    size_dict = {}
+    for partition in partitions:
+        if not len(partition) in size_dict:
+            size_dict[len(partition)] = [partition]
+        else:
+            size_dict[len(partition)].append(partition)
+    return size_dict
+
+# --- remove small outputs ---
+print('\nremoving small outputs')
+current_transaction = 1
+for transaction in transactions:
+    transaction_hash = transaction[0]
+    inputs = transaction[1]
+    outputs = transaction[2]
+
+    # generate all input and output partitions
+    input_partitions = get_partitions(inputs)
+    output_partitions = get_partitions(outputs)
+
+    # group partitions by size
+    input_partitions = group_by_size(input_partitions)
+    output_partitions = group_by_size(output_partitions)
+
+    print(f'generated input and output partitions for transaction {transaction_hash} ({current_transaction}/{len(transactions)})')
+    current_transaction += 1
+
+    # generate all possible orderings of all possible partitions
+
+    # acceptable_partitions = []
+    # for input_partition in input_partitions:
+    #     for output_partition in output_partitions:
+    #         pass
+
+    # print(f'{transaction_hash} input partitions: {input_partitions}')
+
+
+
+    
+
 
 # print('\nclassifying transactions')
 
