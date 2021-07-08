@@ -21,11 +21,13 @@ def read_transaction(line):
     return [transaction_hash, inputs, outputs, transaction_fee]
 
 def is_large(transaction):
-    size_limit = 7
+    size_limit = 10
     if len(transaction[1]) > size_limit or len(transaction[2]) > size_limit:
         return True
     else:
         return False
+
+program_start = perf_counter()
 
 # --- locate csv files ---
 print('locating csv files')
@@ -68,6 +70,12 @@ num_simple = 0
 num_separable = 0
 num_ambiguous = 0
 
+timing_dict = {
+    'simple': [],
+    'separable': [],
+    'ambiguous': []
+}
+
 for transaction in transactions:
     classif_start = perf_counter()
     
@@ -97,6 +105,7 @@ for transaction in transactions:
             num_simple += 1
 
     classif_end = perf_counter()
+    timing_dict[type].append(classif_end - classif_start)
     num_word = 'partition' if num_partitions == 1 else 'partitions'
     cardinality = f'{len(inputs):>3}:{len(outputs):<3}'
     print(f'found {num_partitions:4} {num_word:10} for transaction {transaction_hash} - cardinality: {cardinality} classification: {type:9} time: {classif_end - classif_start:.2e}s')
@@ -106,10 +115,30 @@ percent_simple = (num_simple / total_transactions) * 100
 percent_separable = (num_separable / total_transactions) * 100
 percent_ambiguous = (num_ambiguous / total_transactions) * 100
 
+program_end = perf_counter()
+execution_time = (program_end - program_start)
+
 print()
-print(f'total transactions: {total_transactions:,}')
-print(f'            simple: {num_simple:,} ({percent_simple:.2f}%)')
-print(f'         separable: {num_separable:,} ({percent_separable:.2f}%)')
-print(f'         ambiguous: {num_ambiguous:,} ({percent_ambiguous:.2f}%)')
+print(f'  total transactions: {total_transactions:^,}')
+print(f'              simple: {num_simple:^6,} ({percent_simple:05.2f}%)')
+print(f'           separable: {num_separable:^6,} ({percent_separable:05.2f}%)')
+print(f'           ambiguous: {num_ambiguous:^6,} ({percent_ambiguous:05.2f}%)')
 
+simple_time = sum(timing_dict['simple'])
+simple_avg = simple_time / num_simple
+simple_worst = max(timing_dict['simple'])
 
+separable_time = sum(timing_dict['separable'])
+separable_avg = separable_time / num_separable
+separable_worst = max(timing_dict['separable'])
+
+ambiguous_time = sum(timing_dict['ambiguous'])
+ambiguous_avg = ambiguous_time / num_ambiguous
+ambiguous_worst = max(timing_dict['ambiguous'])
+
+print()
+print(f'total execution time: {execution_time/60:05.2f} minutes')
+print(f'classification times:')
+print(f'              simple: {simple_time:04.2f}s ({simple_avg:04.2f}s average) ({simple_worst:04.2f} worst)')
+print(f'           separable: {separable_time:04.2f}s ({separable_avg:04.2f}s average) ({separable_worst:04.2f} worst)')
+print(f'           ambiguous: {ambiguous_time:04.2f}s ({ambiguous_avg:04.2f}s average) ({ambiguous_worst:04.2f} worst)')
