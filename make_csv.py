@@ -30,7 +30,6 @@ for file_path in block_file_paths:
             print(f'writing csv file {file_number}')
             write_csv(f'csv_files/{file_name}', transactions)
             file_number += 1
-            print('flushing transactions')
             transactions = []
 
 print('finished main loop')

@@ -1,5 +1,38 @@
 from itertools import permutations
 
+class Transaction:
+	def __init__(self, hash, inputs, outputs, fee, type='unclassified'):
+		self.hash = hash
+		self.inputs = inputs
+		self.outputs = outputs
+		self.fee = fee
+		self.type = type
+
+	def from_csv_string(self, csv_string):
+		fields = csv_string.split(',')
+
+		self.hash = fields[0]
+
+		input_addresses = fields[1].split(':')
+		input_values = fields[2].split(':')
+		self.inputs = list(zip(input_addresses, input_values))
+
+		output_addresses = fields[3].split(':')
+		output_values = fields[4].split(':')
+		self.outputs = list(zip(output_addresses, output_values))
+
+		self.fee = fields[5]
+
+	def to_csv_string(self):
+		input_addresses = [input[0] for input in self.inputs]
+		input_values = [input[1] for input in self.inputs]
+
+		output_addresses = [output[0] for output in self.outputs]
+		output_values = [output[1] for output in self.outputs]
+
+		csv_string = f'{hash},{input_addresses},{input_values},{output_addresses},{output_values},{self.fee}\n'
+		return csv_string
+
 def single_partition_to_string(partition):
 	'''
 	input:		a partition of a set
@@ -117,17 +150,13 @@ def get_acceptable_connections(partition_size,input_partition,output_partition,t
 	return acceptable_connections
 
 def get_acceptable_partitions(transaction):
-	inputs = transaction[1]
-	outputs = transaction[2]
-	transaction_fee = transaction[3]
-
-	num_inputs = len(inputs)
-	num_outputs = len(outputs)
+	num_inputs = len(transaction.inputs)
+	num_outputs = len(transaction.outputs)
 
 	max_partition_size = min(num_inputs,num_outputs)
 
-	input_partitions = get_partitions(inputs,max_partition_size)
-	output_partitions = get_partitions(outputs,max_partition_size)
+	input_partitions = get_partitions(transaction.inputs,max_partition_size)
+	output_partitions = get_partitions(transaction.outputs,max_partition_size)
 
 	input_partitions = group_partitions_by_size(input_partitions)
 	output_partitions = group_partitions_by_size(output_partitions)
@@ -136,28 +165,46 @@ def get_acceptable_partitions(transaction):
 	for i in range(2,max_partition_size+1):
 		for input_partition in input_partitions[i]:
 			for output_partition in output_partitions[i]:
-				acceptable_partitions += get_acceptable_connections(i,input_partition,output_partition,transaction_fee)
+				acceptable_partitions += get_acceptable_connections(i,input_partition,output_partition,transaction.fee)
 	
 	return acceptable_partitions
+
+def consolodate_same_addresses(transaction):
+	# consolodate input addresses
+	input_dict = {}
+	for input in transaction.inputs:
+		if input[0] in input_dict:
+			input_dict[input[0]] += input[1]
+		else:
+			input_dict[input[0]] = input[1]
+	transaction.inputs = list(input_dict.items())
+
+	# consolodate output addresses
+	output_dict = {}
+	for output in transaction.outputs:
+		if output[0] in output_dict:
+			output_dict[output[0]] += output[1]
+		else:
+			output_dict[output[0]] = output[1]
+	transaction.outputs = list(output_dict.items())
+
+	return transaction
 
 def sort_key(input):
 	return input[1]
 
 def remove_small_inputs(transaction):
-	inputs = transaction[1]
-	transaction_fee = transaction[3]
 
-	inputs.sort(key=sort_key)
+	transaction.inputs.sort(key=sort_key)
 	inputs_to_remove = []
-	for input in inputs:
-		if input[1] <= transaction_fee:
+	for input in transaction.inputs:
+		if input[1] <= transaction.fee:
 			inputs_to_remove.append(input)
-			transaction_fee -= input[1]
+			transaction.fee -= input[1]
 		else:
 			break
 
-	transaction[1] = [x for x in inputs if not x in inputs_to_remove]
-	transaction[3] = transaction_fee
+	transaction.inputs = [x for x in transaction.inputs if not x in inputs_to_remove]
 	return transaction
 
 def remove_small_outputs(transaction):
@@ -186,21 +233,18 @@ def remove_small_outputs(transaction):
 		if min_flow > delta:
 			delta = min_flow
 
-	outputs = transaction[2]
-	transaction_fee = transaction[3]
-
-	outputs.sort(key=sort_key)
+	transaction.outputs.sort(key=sort_key)
 	outputs_to_remove = []
-	for output in outputs:
+	for output in transaction.outputs:
 		if output[1] <= delta:
 			outputs_to_remove.append(output)
-			transaction_fee += output[1]
+			transaction.fee += output[1]
 
-	transaction[2] = [x for x in outputs if not x in outputs_to_remove]
-	transaction[3] = transaction_fee
+	transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
 	return transaction
 
 def simplify(transaction):
+	transaction = consolodate_same_addresses(transaction)
 	transaction = remove_small_inputs(transaction)
 	transaction = remove_small_outputs(transaction)
 	
@@ -226,7 +270,8 @@ if __name__ == '__main__':
 		# example from figure 10 (becomes separable after removing small inputs)
 		'figure10': ['t0',[('a1',50),('a2',40),('a3',1)],[('b1',49),('b2',39)],3],
 	}
-	transaction = example_transactions['figure4']
+
+	transaction = Transaction('t0', [('a1',101),('a2',200),('a3',102),('a4',300)], [('b1',51),('b2',250),('b3',52),('b4',350)], 10)
 
 	acceptable_partitions = untangle(transaction)
 	

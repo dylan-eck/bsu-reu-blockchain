@@ -1,28 +1,40 @@
-from untangle import untangle
+from untangle import Transaction, untangle
 from time import perf_counter
 import os
 import re
 
 def read_transaction(line):
     line = line.split(',')
-    transaction_hash = line[0]
+    hash = line[0]
+
     input_addresses = line[1].split(':')
     if input_addresses == ['coinbase']:
-        return
-
+        return None
     input_values = [int(x) for x in line[2].split(':')]
+    inputs = list(zip(input_addresses, input_values))
+
     output_addresses = line[3].split(':')
     output_values = [int(x) for x in line[4].split(':')]
-    transaction_fee = int(line[5])
-
-    inputs = list(zip(input_addresses, input_values))
     outputs = list(zip(output_addresses, output_values))
 
-    return [transaction_hash, inputs, outputs, transaction_fee]
+    fee = int(line[5])
+
+    transaction = Transaction(hash, inputs, outputs, fee)
+    return transaction
+
+# def write_transaction(file, transaction):
+#     hash = transaction[0]
+#     input_addresses = [input[0] for input in transaction[1]]
+#     input_values = [input[1] for input in transaction[1]]
+#     output_addresses = [output[0] for output in transaction[2]]
+#     output_values = [output[1] for output in transaction[2]]
+#     fee = transaction[3]
+
+#     file.write(f'{hash},{input_addresses},{input_values},{output_addresses},{output_values},{fee}\n')
 
 def is_large(transaction):
-    size_limit = 10
-    if len(transaction[1]) > size_limit or len(transaction[2]) > size_limit:
+    size_limit = 8
+    if len(transaction.inputs) >= size_limit or len(transaction.outputs) >= size_limit:
         return True
     else:
         return False
@@ -58,71 +70,63 @@ for file_path in csv_file_paths:
         current_file += 1
 
 transactions = transactions[:10000]
-# --- remove transactions with large numbers of inputs or outputs ---
-
-print('\nremoving large transactions')
-transactions = [transaction for transaction in transactions if not is_large(transaction)]
 
 # --- untangle / classify transactions ---
-
 print('\nclassifying transactions')
 num_simple = 0
 num_separable = 0
 num_ambiguous = 0
+num_intract = 0
 
 timing_dict = {
     'simple': [],
     'separable': [],
-    'ambiguous': []
+    'ambiguous': [],
+    'intractable': []
 }
 
 for transaction in transactions:
     classif_start = perf_counter()
     
-    transaction_hash = transaction[0]
-    inputs = transaction[1]
-    outputs = transaction[2]
-
-    if len(inputs) == 1 or len(outputs) == 1:
+    if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
         num_partitions = 0
-        type = 'simple'
+        transaction.type = 'simple'
         num_simple += 1
+
+    elif is_large(transaction):
+        transaction.type = 'intractable'
+        num_intract += 1
+
     else:
-        print(f'classifying transaction {transaction_hash}',end='\r')
+        print(f'classifying transaction {transaction.hash}',end='\r')
 
         partitions = untangle(transaction)
         
         num_partitions = len(partitions)
         if partitions:
             if num_partitions == 1:
-                type = 'separable'
+                transaction.type = 'separable'
                 num_separable += 1
             else:
-                type = 'ambiguous'
+                transaction.type = 'ambiguous'
                 num_ambiguous += 1
         else:
-            type = 'simple'
+            transaction.type = 'simple'
             num_simple += 1
 
+    # print information about the most recent transaction that was proccessed
     classif_end = perf_counter()
-    timing_dict[type].append(classif_end - classif_start)
+    timing_dict[transaction.type].append(classif_end - classif_start)
     num_word = 'partition' if num_partitions == 1 else 'partitions'
-    cardinality = f'{len(inputs):>3}:{len(outputs):<3}'
-    print(f'found {num_partitions:4} {num_word:10} for transaction {transaction_hash} - cardinality: {cardinality} classification: {type:9} time: {classif_end - classif_start:.2e}s')
+    cardinality = f'{len(transaction.inputs):>3}:{len(transaction.outputs):<3}'
+    print(f'found {num_partitions:4} {num_word:10} for transaction {transaction.hash} - cardinality: {cardinality} classification: {transaction.type:11} time: {classif_end - classif_start:.2e}s')
 
+# --- print information summarizing all of the transactions that were processed ---
 total_transactions = len(transactions)
 percent_simple = (num_simple / total_transactions) * 100
 percent_separable = (num_separable / total_transactions) * 100
 percent_ambiguous = (num_ambiguous / total_transactions) * 100
-
-program_end = perf_counter()
-execution_time = (program_end - program_start)
-
-print()
-print(f'  total transactions: {total_transactions:^,}')
-print(f'              simple: {num_simple:^6,} ({percent_simple:05.2f}%)')
-print(f'           separable: {num_separable:^6,} ({percent_separable:05.2f}%)')
-print(f'           ambiguous: {num_ambiguous:^6,} ({percent_ambiguous:05.2f}%)')
+percent_intract = (num_intract / total_transactions) * 100
 
 simple_time = sum(timing_dict['simple'])
 simple_avg = simple_time / num_simple
@@ -136,9 +140,23 @@ ambiguous_time = sum(timing_dict['ambiguous'])
 ambiguous_avg = ambiguous_time / num_ambiguous
 ambiguous_worst = max(timing_dict['ambiguous'])
 
+intract_time = sum(timing_dict['intractable'])
+intract_avg = intract_time / num_intract
+intract_worst = max(timing_dict['intractable'])
+
+program_end = perf_counter()
+execution_time = (program_end - program_start)
+
 print()
-print(f'total execution time: {execution_time/60:05.2f} minutes')
-print(f'classification times:')
-print(f'              simple: {simple_time:04.2f}s ({simple_avg:04.2f}s average) ({simple_worst:04.2f} worst)')
-print(f'           separable: {separable_time:04.2f}s ({separable_avg:04.2f}s average) ({separable_worst:04.2f} worst)')
-print(f'           ambiguous: {ambiguous_time:04.2f}s ({ambiguous_avg:04.2f}s average) ({ambiguous_worst:04.2f} worst)')
+print(f'  total transactions: {total_transactions:^7,}')
+print(f'              simple: {num_simple:^7,} ({percent_simple:5.2f}%)')
+print(f'           separable: {num_separable:^7,} ({percent_separable:5.2f}%)')
+print(f'           ambiguous: {num_ambiguous:^7,} ({percent_ambiguous:5.2f}%)')
+print(f'         intractable: {num_intract:^7,} ({percent_intract:5.2f}%)')
+
+print()
+print(f'total execution time: {execution_time/60:07.2f} minutes')
+print(f'              simple: {simple_time:7.2f}s ({simple_avg:5.2f}s average) ({simple_worst:5.2f}s worst)')
+print(f'           separable: {separable_time:7.2f}s ({separable_avg:5.2f}s average) ({separable_worst:5.2f}s worst)')
+print(f'           ambiguous: {ambiguous_time:7.2f}s ({ambiguous_avg:5.2f}s average) ({ambiguous_worst:5.2f}s worst)')
+print(f'         intractable: {intract_time:7.2f}s ({intract_avg:5.2f}s average) ({intract_worst:5.2f}s worst)')
