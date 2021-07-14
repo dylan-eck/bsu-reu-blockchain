@@ -1,15 +1,14 @@
 '''
 This script extracts transaction data from block json files retrieved using the blockchain.com api
 
-inputs: block json files placed in the ./block_data/ directory
+inputs: block json files placed in the './block_data/' directory
 
-outputs: csv files containing transaction data written to ./csv_files/raw_transactions_unclassifed/
+outputs: csv files containing transaction data written to './csv_files/raw_transactions_unclassifed/'
 '''
 from time import perf_counter
 import json
 import re
 import os
-
 
 from functions import write_csv
 
@@ -131,4 +130,4 @@ if len(transactions) > 0:
     file_number += 1
 
 t2 = perf_counter()
-print(f'execution time {t2-t1:.2f}s')
+print(f'execution time: {(t2-t1)/60:.2f} minutes')

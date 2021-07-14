@@ -51,49 +51,6 @@ def get_block(block_hash):
     block_data = json.load(response)
     return block_data
 
-# block data processing
-
-def get_inputs(transaction):
-    inputs = []
-
-    for input in transaction.get('inputs'):
-        prev_out = input.get('prev_out')
-        
-        if prev_out is not None:
-            addr = prev_out.get('addr')
-            value = prev_out.get('value')
-        else:
-            addr = 'coinbase'
-            value = ''
-
-        inputs.append([addr, value]) 
-
-    return inputs
-
-def get_outputs(transaction):
-    outputs = []
-
-    for output in transaction.get('out'):
-        addr = output.get('addr')
-        value = output.get('value')
-
-        if addr is not None:
-            outputs.append([addr,value])
-
-    return outputs
-
-def get_block_file_paths(directory):
-    block_file_paths = []
-
-    for (root, dirs, files) in os.walk(directory):
-        for file in files:
-            pattern = re.compile("^[a-z0-9]{64}.json$")
-            if pattern.match(file):
-                file_path = os.path.join(root, file)
-                block_file_paths.append(file_path)
-
-    return block_file_paths
-
 # file I/O functions
 
 def load_json(filepath):
