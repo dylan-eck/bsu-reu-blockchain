@@ -1,3 +1,11 @@
+'''
+This script collects block json files using the blockchain.com data api and saves them locally
+
+inputs:     a date range (specified using a start date and end date) to collect blocks from
+
+outputs:    json files for all blocks added from the start date up to and including the end date
+'''
+
 from time import perf_counter
 from datetime import datetime
 from dateutil import tz
@@ -12,7 +20,7 @@ from functions import get_days, get_block_summaries, get_block, save_json, load_
 if not os.path.exists('logs'):
     os.mkdir('logs')
 
-logging.basicConfig(filename='logs/app.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='logs/collect_blocks.log',filemode='w',format='%(asctime)s - %(levelname)s: %(message)s', level=logging.DEBUG)
 
 program_start = perf_counter()
 
@@ -28,8 +36,8 @@ days = get_days(start_day, end_day)
 
 # create a directory to store the block json files
 try:
-    if not os.path.exists('block_data'):
-        os.mkdir('block_data')
+    if not os.path.exists('../block_data'):
+        os.mkdir('../block_data')
 except:
     message = 'could not create block_data directory'
     logging.critical(message)
@@ -43,7 +51,7 @@ for day in days:
     day_start = perf_counter()
 
     day_string = day.strftime("%Y-%m-%d")
-    day_directory = f'block_data/{day_string}'
+    day_directory = f'../block_data/{day_string}'
 
     logging.info(f'collecting blocks from {day_string}\n')
 
@@ -83,7 +91,7 @@ for day in days:
 
             logging.info(f'collected block summary file containing {num_blocks} blocks')
 
-            file_name = f'block_data/{day_string}/blocks_{day_string}.json'
+            file_name = f'../block_data/{day_string}/blocks_{day_string}.json'
             save_json(file_name,block_summaries)
 
         except:
@@ -125,7 +133,7 @@ for day in days:
             logging.error(f'failed to load block {block_hash}')
             continue
 
-        filename = f'block_data/{day_string}/{block_hash}.json'
+        filename = f'../block_data/{day_string}/{block_hash}.json'
         save_json(filename, block_data)
 
         block_end = perf_counter()
