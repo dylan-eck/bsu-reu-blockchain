@@ -32,13 +32,13 @@ class Transaction:
 		self.fee = int(fields[5])
 
 	def to_csv_string(self):
-		input_addresses = [input[0] for input in self.inputs]
-		input_values = [input[1] for input in self.inputs]
+		input_addresses = ':'.join([input[0] for input in self.inputs])
+		input_values = ':'.join([str(input[1]) for input in self.inputs])
 
-		output_addresses = [output[0] for output in self.outputs]
-		output_values = [output[1] for output in self.outputs]
+		output_addresses = ':'.join([output[0] for output in self.outputs])
+		output_values = ':'.join([str(output[1]) for output in self.outputs])
 
-		csv_string = f'{hash},{input_addresses},{input_values},{output_addresses},{output_values},{self.fee}\n'
+		csv_string = f'{self.hash},{input_addresses},{input_values},{output_addresses},{output_values},{self.fee},{self.type}\n'
 		return csv_string
 
 def single_partition_to_string(partition):
@@ -251,13 +251,7 @@ def remove_small_outputs(transaction):
 	transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
 	return transaction
 
-def simplify(transaction):
-	transaction = consolodate_same_addresses(transaction)
-	transaction = remove_small_inputs(transaction)
-	transaction = remove_small_outputs(transaction)
-	
 def untangle(transaction):
-	simplify(transaction)
 	acceptable_partitions = get_acceptable_partitions(transaction)
 	return acceptable_partitions
 

@@ -82,42 +82,6 @@ def get_outputs(transaction):
 
     return outputs
 
-def get_tx_data(block):
-    transactions = block.get('tx')
-
-    transaction_data = []
-
-    for transaction in transactions:
-        transaction_hash = transaction.get('hash')
-        transaction_fee = transaction.get('fee')
-
-        inputs = get_inputs(transaction)
-        outputs = get_outputs(transaction)
-
-        if inputs and outputs:
-
-            input_addr_str = ''
-            input_val_str = ''
-            for input in inputs:
-                if not None in input:
-                    input_addr_str += f'{input[0]}:'
-                    input_val_str += f'{input[1]}:'
-            input_addr_str = input_addr_str[:-1]
-            input_val_str = input_val_str[:-1]
-
-            output_addr_str = ''
-            output_val_str = ''
-            for output in outputs:
-                if not None in output:
-                    output_addr_str += f'{output[0]}:'
-                    output_val_str += f'{output[1]}:'
-            output_addr_str = output_addr_str[:-1]
-            output_val_str = output_val_str[:-1]
-
-            transaction_data.append([transaction_hash, input_addr_str, input_val_str, output_addr_str, output_val_str, transaction_fee])
-
-    return transaction_data
-
 def get_block_file_paths(directory):
     block_file_paths = []
 
