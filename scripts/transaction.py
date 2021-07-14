@@ -28,6 +28,7 @@ class Transaction:
 		self.outputs = list(zip(output_addresses, output_values))
 
 		self.fee = int(fields[5])
+		self.type = fields[6].strip()
 
 	def to_csv_string(self):
 		input_addresses = ':'.join([input[0] for input in self.inputs])
