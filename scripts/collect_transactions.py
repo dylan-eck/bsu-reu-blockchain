@@ -92,7 +92,7 @@ def get_tx_data(block):
 if not os.path.exists('csv_files'):
     os.mkdir('csv_files')
 
-block_data_directory = 'block_data/'
+block_data_directory = '../block_data/'
 block_file_paths = get_block_file_paths(block_data_directory)
 
 t1 = perf_counter()

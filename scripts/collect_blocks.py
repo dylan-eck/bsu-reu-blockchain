@@ -200,7 +200,7 @@ for day in days:
 # report errors that occured
 
 num_failed_days = len(failed_days)
-failed_days_message = f'blocks for the following {num_failed_days} days could not be retrieved:\n\n'
+failed_days_message = f'all blocks added on the following {num_failed_days} days could not be retrieved:\n\n'
 
 for day in failed_days:
     failed_days_message += f'    {day}\n'
