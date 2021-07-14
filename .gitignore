@@ -6,3 +6,5 @@ logs
 deprecated
 test.py
 .DS_store
+scripts/temp.py
+

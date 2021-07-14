@@ -106,9 +106,9 @@ program_start = perf_counter()
 
 csv_headers = [['transaction_hash','input_addresses','input_values','output_addresses','output_values','transaction_fee','classification']]
 
-csv_files_directory = '../csv_files/raw_transactions_unclassified/'
-if not os.path.exists(csv_files_directory):
-    os.mkdir(csv_files_directory)
+output_directory = '../csv_files/raw_transactions_unclassified/'
+if not os.path.exists(output_directory):
+    os.mkdir(output_directory)
 
 block_data_directory = '../block_data/'
 day_directories = get_day_directories(block_data_directory)
@@ -117,7 +117,8 @@ for directory in day_directories:
     block_file_paths = get_block_file_paths(block_data_directory + directory)
 
     print('processing blocks... ', end='\r', flush=True)
-    transactions = csv_headers
+    transactions = []
+    transactions += csv_headers
     for file_path in block_file_paths:
         with open(file_path) as input_file:
             block = json.load(input_file)
@@ -127,7 +128,7 @@ for directory in day_directories:
             print(f'processing blocks... {block_hash}', end='\r', flush=True)
     print(f'{"processing blocks... done":<85}')
 
-    output_file = f'{csv_files_directory}{directory}.csv'
+    output_file = f'{output_directory}{directory}.csv'
     if os.path.exists(output_file):
         os.remove(output_file)
     print(f'writing file {directory}.csv... ', end='', flush=True)
