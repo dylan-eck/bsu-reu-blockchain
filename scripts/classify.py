@@ -48,27 +48,28 @@ for file_name in csv_file_names:
     total_transactions = len(transactions)
     current_transaction = 1
     for transaction in transactions:
-        print(f'classifying transactions... {transaction.hash} ({current_transaction:,}/{total_transactions:,})', end='\r', flush=True)
-        current_transaction += 1
-        classif_start = perf_counter()
+        if transaction.type == 'unclassified':
+            print(f'classifying transactions... {transaction.hash} ({current_transaction:,}/{total_transactions:,})', end='\r', flush=True)
+            current_transaction += 1
+            classif_start = perf_counter()
 
-        tx_size_limit = 8
-        if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
-            transaction.type = 'simple'
-
-        elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
-            transaction.type = 'intractable'
-
-        else:
-            partitions = untangle(transaction)
-            num_partitions = len(partitions)
-            if partitions:
-                if num_partitions == 1:
-                    transaction.type = 'separable'
-                else:
-                    transaction.type = 'ambiguous'
-            else:
+            tx_size_limit = 8
+            if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
                 transaction.type = 'simple'
+
+            elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
+                transaction.type = 'intractable'
+
+            else:
+                partitions = untangle(transaction)
+                num_partitions = len(partitions)
+                if partitions:
+                    if num_partitions == 1:
+                        transaction.type = 'separable'
+                    else:
+                        transaction.type = 'ambiguous'
+                else:
+                    transaction.type = 'simple'
 
     print(f'{"classifying transactions... ({current_transaction-1:,}/{total_transactions:,})":<100}')
 
