@@ -76,7 +76,9 @@ def get_tx_data(block):
         inputs = get_inputs(transaction)
         outputs = get_outputs(transaction)
 
-        if inputs and outputs:
+        if inputs == [['coinbase','']]:
+            continue
+        elif inputs and outputs:
 
             input_addr_str = ''
             input_val_str = ''

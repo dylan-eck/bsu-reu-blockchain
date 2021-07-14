@@ -7,7 +7,7 @@ class Transaction:
 		self.type = type
 		
 	def is_coinbase(self):
-		return self.inputs == [('coinbase',)]
+		return self.inputs == []
 
 	def from_csv_string(self, csv_string):
 		fields = csv_string.split(',')
