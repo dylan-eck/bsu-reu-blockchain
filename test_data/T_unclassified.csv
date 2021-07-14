@@ -1,0 +1,8 @@
+transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,transaction_type
+t0,a0,100,a1:a2,45:48,7,unclassified
+t1,a1,27,a3,22,5,unclassified
+t2,a3,246,a4:a5,180,62,4unclassified
+t3,a5:a6,53:82,a7,131,4,unclassified
+t4,a7:a8,20:10,a10:a13:a15,19:7:3,1,uclassified
+t5,a9:a10,98:25,a12,120,3,unclassified
+t6,a11,350,a13:a14,150:175,25,unclassified

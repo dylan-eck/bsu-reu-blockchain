@@ -1,0 +1,8 @@
+transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class
+t0,a0,100,a1:a2,45:48,7,simple
+t1,a1,27,a3,22,5,simple
+t2,a3,246,a4,180,62,simple
+t3,a5:a6,53:82,a7,131,4,simple
+t4,a7:a8,20:10,a15:a13:a10,3:7:19,1,separable
+t5,a9:a10,98:25,a12,120,3,simple
+t6,a11,350,a13:a14,150:175,25,simple
