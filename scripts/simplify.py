@@ -1,3 +1,5 @@
+import os
+
 from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv
 from untangle import get_acceptable_partitions
@@ -80,6 +82,9 @@ csv_file_directory = '../csv_files/'
 input_directory = f'{csv_file_directory}raw_transactions_classified/'
 output_directory = f'{csv_file_directory}simplified_transactions/'
 
+if not os.path.exists(output_directory):
+	os.mkdir(output_directory)
+
 csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
 for file_name in csv_file_names:
@@ -120,4 +125,3 @@ for file_name in csv_file_names:
 		for transaction in transactions:
 			output_file.write(transaction.to_csv_string())
 	print(f'{"    writing new csv file... done":<100}')
-

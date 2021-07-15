@@ -1,5 +1,7 @@
 from itertools import permutations
+
 from transaction import Transaction
+from functions import get_file_names, load_transactions_from_csv
 
 def single_partition_to_string(partition):
 	'''
@@ -141,30 +143,41 @@ def untangle(transaction):
 	acceptable_partitions = get_acceptable_partitions(transaction)
 	return acceptable_partitions
 
+def transactions_from_partitions(transaction, partitions):
+    transactions = []
+
+    hash = transaction.hash
+    fee = transaction.fee
+
+    for partition in partitions:
+        inputs = partition[0]
+        outputs = partition[1]
+        partition_size = len(inputs)
+
+        for i in range(partition_size):
+            transaction = Transaction(hash,inputs[i],outputs[i],fee)
+            transactions.append(transaction)
+
+    return transactions
+
 if __name__ == '__main__':
-	example_transactions = { 
-		# example from figure 4 (ambiguous)
-		'figure4': ['t0',[('a1',101),('a2',200),('a3',102),('a4',300)],[('b1',51),('b2',250),('b3',52),('b4',350)],10],
+	csv_file_directory = '../csv_files/'
+	input_directory = f'{csv_file_directory}simplified_transactions'
+	output_directory = f'{csv_file_directory}untangled_transactions/'
 
-		# example from figure 5 (ambiguous)
-		'figure5': ['t0',[('a1',11),('a2',27),('a3',5)],[('b1',5),('b2',6),('b3',32)],0],
+	csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
-		# example from figure 6 (separable)
-		'figure6': ['t0',[('a1',20),('a2',10)],[('b1',19),('b2',7),('b3',3)],1],
+	for file in csv_file_names:
+		transactions = load_transactions_from_csv(f'{input_directory}{file}')
 
-		# example from figure 7 (ambiguous)
-		'figure7': ['t0',[('a1',10),('a2',10)],[('b1',10),('b2',7),('b3',3)],0],
+		for transaction in transactions:
+			partitions = get_acceptable_partitions(transaction)
+			
+			if len(partitions) == 0 or len(partitions) > 1:
+				continue
 
-		# example from figure 10 (becomes separable after removing small inputs)
-		'figure10': ['t0',[('a1',50),('a2',40),('a3',1)],[('b1',49),('b2',39)],3],
-	}
-
-	transaction = Transaction('t0', [('a1',101),('a2',200),('a3',102),('a4',300)], [('b1',51),('b2',250),('b3',52),('b4',350)], 10)
-
-	acceptable_partitions = untangle(transaction)
-	
-	num_partitions = len(acceptable_partitions)
-	num_word = 'partition' if num_partitions == 1 else 'partitions'
-	print(f'\nfound {num_partitions} acceptable {num_word}:\n')
-	for partition in acceptable_partitions:
-		print(f'{tx_partition_to_string(partition)}')
+			else:
+				sub_transactions = transactions_from_partitions[partitions]
+				idx = transactions.index(transaction)
+				for sub_transaction in sub_transactions:
+					transactions.insert(idx, sub_transaction)

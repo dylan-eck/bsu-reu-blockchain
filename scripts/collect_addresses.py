@@ -5,7 +5,7 @@ csv_file_directory = '../csv_files/'
 input_directory = f'{csv_file_directory}raw_transactions_unclassified/'
 output_directory = f'{csv_file_directory}raw_transactions_unclassified/'
 
-csv_file_names = get_file_names(input_directory,  "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
 address_dict = dict()
 
