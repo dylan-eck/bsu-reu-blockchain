@@ -35,7 +35,7 @@ for file in csv_file_names:
 out_file_name = 'address_list.csv'
 print(f'writing output file {out_file_name}')
 with open(f'{output_directory}{out_file_name}','w') as output_file:
-    output_file.write('address,is_many_to_many\n')
+    output_file.write('address,in_many_to_many\n')
     for address in address_dict:
         print(f'writing addresses... {address}',end='\r',flush=True)
         output_file.write(f'{address},{address_dict[address]}\n')
