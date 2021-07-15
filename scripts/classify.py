@@ -12,23 +12,6 @@ import os
 from untangle import untangle
 from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv
-
-def transactions_from_partitions(transaction, partitions):
-    transactions = []
-
-    hash = transaction.hash
-    fee = transaction.fee
-
-    for partition in partitions:
-        inputs = partition[0]
-        outputs = partition[1]
-        partition_size = len(inputs)
-
-        for i in range(partition_size):
-            transaction = Transaction(hash,inputs[i],outputs[i],fee)
-            transactions.append(transaction)
-
-    return transactions
     
 program_start = perf_counter()
 
@@ -71,7 +54,7 @@ for file_name in csv_file_names:
                 else:
                     transaction.type = 'simple'
 
-    print(f'{"classifying transactions... ({current_transaction-1:,}/{total_transactions:,})":<100}')
+    print(f'{f"classifying transactions... ({current_transaction-1:,}/{total_transactions:,})":<100}')
 
     print(f'writing new csv file... {output_directory}{file_name}', end='\r', flush=True)
     with open(f'{output_directory}{file_name}', 'w') as output_file:
