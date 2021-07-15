@@ -5,12 +5,14 @@ inputs: block json files placed in the './block_data/' directory
 
 outputs: csv files containing transaction data written to './csv_files/raw_transactions_unclassifed/'
 '''
+from itertools import chain
 from time import perf_counter
 import json
 import re
 import os
 
 from functions import write_csv
+from transaction import Transaction
 
 def get_day_directories(block_data_directory):
     day_directories = []
@@ -48,7 +50,7 @@ def get_inputs(transaction):
             addr = 'coinbase'
             value = ''
 
-        inputs.append([addr, value]) 
+        inputs.append((addr, value)) 
 
     return inputs
 
@@ -60,7 +62,7 @@ def get_outputs(transaction):
         value = output.get('value')
 
         if addr is not None:
-            outputs.append([addr,value])
+            outputs.append((addr,value))
 
     return outputs
 
@@ -70,43 +72,23 @@ def get_tx_data(block):
     transaction_data = []
 
     for transaction in transactions:
-        transaction_hash = transaction.get('hash')
-        transaction_fee = transaction.get('fee')
+        hash = transaction.get('hash')
+        fee = transaction.get('fee')
 
         inputs = get_inputs(transaction)
         outputs = get_outputs(transaction)
 
-        if inputs == [['coinbase','']]:
+        if inputs == [('coinbase','')]:
             continue
-        elif inputs and outputs:
-
-            input_addr_str = ''
-            input_val_str = ''
-            for input in inputs:
-                if not None in input:
-                    input_addr_str += f'{input[0]}:'
-                    input_val_str += f'{input[1]}:'
-            input_addr_str = input_addr_str[:-1]
-            input_val_str = input_val_str[:-1]
-
-            output_addr_str = ''
-            output_val_str = ''
-            for output in outputs:
-                if not None in output:
-                    output_addr_str += f'{output[0]}:'
-                    output_val_str += f'{output[1]}:'
-            output_addr_str = output_addr_str[:-1]
-            output_val_str = output_val_str[:-1]
-
-            classification = 'unclassified'
-
-            transaction_data.append([transaction_hash, input_addr_str, input_val_str, output_addr_str, output_val_str, transaction_fee, classification])
+        elif not None in chain(*inputs) and not None in chain(*outputs):
+            transaction = Transaction(hash, inputs, outputs, fee)
+            transaction_data.append(transaction)
 
     return transaction_data
 
 program_start = perf_counter()
 
-csv_headers = [['transaction_hash','input_addresses','input_values','output_addresses','output_values','transaction_fee','classification']]
+csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
 
 output_directory = '../csv_files/raw_transactions_unclassified/'
 if not os.path.exists(output_directory):
@@ -120,7 +102,6 @@ for directory in day_directories:
 
     print('processing blocks... ', end='\r', flush=True)
     transactions = []
-    transactions += csv_headers
     for file_path in block_file_paths:
         with open(file_path) as input_file:
             block = json.load(input_file)
@@ -130,12 +111,18 @@ for directory in day_directories:
             print(f'processing blocks... {block_hash}', end='\r', flush=True)
     print(f'{"processing blocks... done":<85}')
 
-    output_file = f'{output_directory}{directory}.csv'
-    if os.path.exists(output_file):
-        os.remove(output_file)
-    print(f'writing file {directory}.csv... ', end='', flush=True)
-    write_csv(output_file, transactions)
-    print('done')
+    out_file_name =f'{output_directory}{directory}.csv'
+    if os.path.exists(out_file_name):
+        os.remove(out_file_name)
+
+    print(f'writing file {directory}.csv')
+    with open(out_file_name, 'w') as output_file:
+        output_file.write(csv_headers)
+        for transaction in transactions:
+            try:
+                output_file.write(f'{transaction.to_csv_string()}')
+            except:
+                print(f'failed to write transaction {transaction.hash}')
 
 program_end = perf_counter()
 execution_time_s = program_end - program_start
