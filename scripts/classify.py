@@ -5,12 +5,10 @@ intputs:    csv files containing transaction data for unclassified transactions
 
 outputs:    csv files containing the input transactions along with their classification
 '''
-
 from time import perf_counter
-import os
 
-from untangle import untangle
 from functions import get_file_names, load_transactions_from_csv
+from untangle import untangle
 
 program_start = perf_counter()
 

@@ -5,13 +5,12 @@ inputs: block json files placed in the './block_data/' directory
 
 outputs: csv files containing transaction data written to './csv_files/raw_transactions_unclassifed/'
 '''
-from itertools import chain
 from time import perf_counter
+from itertools import chain
 import json
 import re
 import os
 
-from functions import write_csv
 from transaction import Transaction
 
 def get_day_directories(block_data_directory):

@@ -1,6 +1,5 @@
 import os
 
-from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv
 from untangle import get_acceptable_partitions
 

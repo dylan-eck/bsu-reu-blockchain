@@ -1,5 +1,4 @@
 from functions import get_file_names, load_transactions_from_csv
-from itertools import chain
 
 csv_file_directory = '../csv_files/'
 input_directory = f'{csv_file_directory}raw_transactions_unclassified/'

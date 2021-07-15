@@ -1,7 +1,8 @@
-from transaction import Transaction
 import os
 import re
 import csv
+
+from transaction import Transaction
 
 def get_immediate_subdirectories(directory_path):
     immediate_subdirectories = []
