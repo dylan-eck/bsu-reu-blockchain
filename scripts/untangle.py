@@ -181,3 +181,10 @@ if __name__ == '__main__':
 				idx = transactions.index(transaction)
 				for sub_transaction in sub_transactions:
 					transactions.insert(idx, sub_transaction)
+	
+	print(f'    writing new csv file... {output_directory}{file}', end='\r', flush=True)
+	with open(f'{output_directory}{file}', 'w') as output_file:
+		output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
+		for transaction in transactions:
+			output_file.write(transaction.to_csv_string())
+	print(f'{"    writing new csv file... done":<100}')
