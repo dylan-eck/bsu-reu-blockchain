@@ -80,9 +80,10 @@ def get_tx_data(block):
 
         if inputs == [('coinbase','')]:
             continue
-        elif not None in chain(*inputs) and not None in chain(*outputs):
-            transaction = Transaction(hash, inputs, outputs, fee)
-            transaction_data.append(transaction)
+        elif inputs and outputs:
+            if not None in chain(*inputs) and not None in chain(*outputs):
+                transaction = Transaction(hash, inputs, outputs, fee)
+                transaction_data.append(transaction)
 
     return transaction_data
 

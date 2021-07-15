@@ -10,14 +10,13 @@ from time import perf_counter
 import os
 
 from untangle import untangle
-from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv
-    
+
 program_start = perf_counter()
 
 csv_file_directory = '../csv_files/'
 input_directory = f'{csv_file_directory}raw_transactions_unclassified/'
-output_directory = f'{csv_file_directory}raw_transactions_classified/'
+output_directory = f'{csv_file_directory}raw_transactions_unclassified/'
 
 # --- locate csv files ---
 print('locating csv files... ', end='', flush=True)
