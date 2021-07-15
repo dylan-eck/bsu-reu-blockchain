@@ -1,23 +1,20 @@
 // create graph project for use with path finding algorithm
 CALL gds.graph.create(
-    'myGraph',
-    'Location',
-    'ROAD',
-    {
-        relationshipProperties: 'cost'
-    }
+    'selectionGraph',
+    'Address',
+    'Transaction'
 );
 
 // get the length of the shortest path between all desired pairs of nodes 
-MATCH (a:Location), (b:Location)
+MATCH (a:Address {candidate: true}), (b:Address {candidate: true})
 WITH a AS source, b AS target
 UNWIND(source) AS sources
 UNWIND(target) AS targets
 
-CALL gds.shortestPath.dijkstra.stream('myGraph', {
+CALL gds.shortestPath.dijkstra.stream('selectionGraph', {
     sourceNode: sources,
-    targetNode: targets,
-    relationshipWeightProperty: 'cost'
+    targetNode: targets
 })
 YIELD totalCost
-RETURN sources, targets, totalCost;
+
+RETURN sources, targets, totalCost
