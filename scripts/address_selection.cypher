@@ -1,5 +1,5 @@
 CALL {
-    // collect all nodes that are not involved in any many to many transactions
+    // find all addresses that are not involved in any many-to-many transactions
     CALL {
         MATCH (a:Address)
         WHERE NOT EXISTS {
@@ -9,7 +9,7 @@ CALL {
         RETURN collect(a) AS potentialCandidateAddresses
     }
 
-    // collect all nodes that are in at least one many to many transaction
+    // find all addresses that are in at least one many-to-many transaction
     CALL {
         MATCH (b:Address)
         WHERE EXISTS {
@@ -19,8 +19,8 @@ CALL {
         RETURN collect(b) AS excludedAddresses
     }
 
-    // find all addresses in potentialCandidateAddresses that are 
-    // at most three transactions away from an excluded address
+    // find all addresses not involved in any many-to-many transactions that are at most
+    // three transactions away from an addresses involved in at least one many-to-many transaction
     MATCH (candidate:Address)-[t:Transaction*1..3]-(excluded:Address)
     WHERE candidate IN potentialCandidateAddresses AND excluded IN excludedAddresses
     RETURN DISTINCT candidate AS c
