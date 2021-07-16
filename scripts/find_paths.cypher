@@ -4,7 +4,7 @@ CALL gds.graph.create(
     'Transaction'
 );
 
-MATCH (a:Address {candidate: true}), (b:Address {candidate: true})
+MATCH (a:Address {selected: true}), (b:Address {selected: true})
 UNWIND(a) AS source
 UNWIND(b) AS target
 
