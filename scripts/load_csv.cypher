@@ -1,5 +1,5 @@
-LOAD CSV WITH HEADERS FROM 'file:///transactions_0.csv' AS row
-WITH row WHERE row.transaction_hash IS NOT NULL
+LOAD CSV WITH HEADERS FROM 'file:///truncated.csv' AS row
+WITH row WHERE SIZE(SPLIT(row.input_addresses, ":")) = 1 OR SIZE(SPLIT(row.output_addresses, ":")) = 1
 
 FOREACH(i IN SPLIT(row.input_addresses, ':') |
     FOREACH(j IN SPLIT(row.output_addresses, ':') |
