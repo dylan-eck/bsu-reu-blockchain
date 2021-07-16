@@ -1,8 +1,8 @@
 # Bitcoin Data Collector
 
 ## About:
-This is a simple python script that uses the blockchain.com data api to collect information
-on all transactions within a specified time period
+This repository contains a collection of python and cypher scripts that can be used to collect and analyze data on transactions stored on the Bitcoin blockchain.
+The data is collected using blockchain.com's data api
 
 ## Requirements:
 - Python:
@@ -10,3 +10,4 @@ on all transactions within a specified time period
   - pip3 : https://pip.pypa.io/en/stable/installing/
   - dateutil : https://dateutil.readthedocs.io/en/stable/
 - blockchain.com API : https://www.blockchain.com/api/blockchain_api
+- neo4j 4.3.2 : https://neo4j.com/download/
