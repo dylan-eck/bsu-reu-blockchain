@@ -171,12 +171,8 @@ if __name__ == '__main__':
 		transactions = load_transactions_from_csv(f'{input_directory}{file}')
 
 		for transaction in transactions:
-			partitions = get_acceptable_partitions(transaction)
-			
-			if len(partitions) == 0 or len(partitions) > 1:
-				continue
-
-			else:
+			if transaction.type == 'separable':
+				partitions = get_acceptable_partitions(transaction)
 				sub_transactions = transactions_from_partitions[partitions]
 				idx = transactions.index(transaction)
 				for sub_transaction in sub_transactions:
