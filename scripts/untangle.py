@@ -1,3 +1,4 @@
+from time import perf_counter
 from itertools import permutations
 import multiprocessing as mp
 
@@ -167,6 +168,8 @@ def func(transaction):
     return sub_transactions
 
 if __name__ == '__main__':
+    program_start = perf_counter()
+
     num_processes = mp.cpu_count()
     pool = mp.Pool(processes=num_processes)
     print(f'found {num_processes} available threads\n')
@@ -178,30 +181,40 @@ if __name__ == '__main__':
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
     for file in csv_file_names:
+        untangle_start = perf_counter()
+
         print(f'processing file {input_directory}{file}:')
+        print('    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}{file}')
+        print('done')
 
         separable_txs = [tx for tx in transactions if tx.type == 'separable']
 
         untangled_txs = pool.map(func, separable_txs)
 
-        # untangled_txs = [item for sublist in untangled_txs for item in sublist]
+        untangled_txs = [item for sublist in untangled_txs for item in sublist]
 
-        flat_txs = []
-        if untangled_txs:
-            for index, tx_list in enumerate(untangled_txs):
-                from classify import classify
-                untangled_txs[index] = [classify(tx) for tx in tx_list]
+        # flat_txs = []
+        # if untangled_txs:
+        #     for index, tx_list in enumerate(untangled_txs):
+        #         from classify import classify
+        #         untangled_txs[index] = [classify(tx) for tx in tx_list]
 
-        for item in untangled_txs:
-            str = [x.type for x in item]
-            if 'separable' in str:
-                print(f'    {str}')
+        # for item in untangled_txs:
+        #     str = [x.type for x in item]
+        #     if 'separable' in str:
+        #         print(f'    {str}')
         
-    
-    # print(f'    writing new csv file... {output_directory}{file}', end='\r', flush=True)
-    # with open(f'{output_directory}{file}', 'w') as output_file:
-    #     output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-    #     for transaction in transactions:
-    #         output_file.write(transaction.to_csv_string())
-    # print(f'{"    writing new csv file... done":<100}')
+        print(f'    writing new csv file {output_directory}{file}...', end='', flush=True)
+        with open(f'{output_directory}{file}', 'w') as output_file:
+            output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
+            for transaction in transactions:
+                output_file.write(transaction.to_csv_string())
+        print('done')
+
+        untangle_end = perf_counter()
+        print(f'finished in {untangle_end - untangle_start:.2f}s\n')
+
+
+    program_end = perf_counter()
+    print(f'execution finished in {program_end - program_start:.2f}s')
