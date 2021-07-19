@@ -13,25 +13,28 @@ from functions import get_file_names, load_transactions_from_csv
 from untangle import untangle
 
 def classify(transaction):
-    if transaction.type == 'unclassified':
+    try:
+        if transaction.type == 'unclassified':
 
-            tx_size_limit = 7
-            if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
-                transaction.type = 'simple'
-
-            elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
-                transaction.type = 'intractable'
-
-            else:
-                partitions = untangle(transaction)
-                num_partitions = len(partitions)
-                if partitions:
-                    if num_partitions == 1:
-                        transaction.type = 'separable'
-                    else:
-                        transaction.type = 'ambiguous'
-                else:
+                tx_size_limit = 7
+                if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
                     transaction.type = 'simple'
+
+                elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
+                    transaction.type = 'intractable'
+
+                else:
+                    partitions = untangle(transaction)
+                    num_partitions = len(partitions)
+                    if partitions:
+                        if num_partitions == 1:
+                            transaction.type = 'separable'
+                        else:
+                            transaction.type = 'ambiguous'
+                    else:
+                        transaction.type = 'simple'
+    except:
+        print(f'        failed to simplify transaction {transaction.hash}')
 
     return transaction
 
@@ -61,7 +64,7 @@ if __name__ == '__main__':
         transactions = load_transactions_from_csv(f'{input_directory}{file_name}')    
         print('done')
 
-        print('    classifying transactions... ', end='', flush=True)
+        print('    classifying transactions... ')
         classified_transactions = pool.map(classify, transactions)
         print('done')
 
