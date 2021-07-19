@@ -17,3 +17,6 @@ CALL gds.shortestPath.dijkstra.stream('selectionGraph', {
 YIELD totalCost
 
 RETURN source.address, target.address, totalCost;
+
+
+

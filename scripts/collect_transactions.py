@@ -77,9 +77,7 @@ def get_tx_data(block):
         inputs = get_inputs(transaction)
         outputs = get_outputs(transaction)
 
-        if inputs == [('coinbase','')]:
-            continue
-        elif inputs and outputs:
+        if inputs and outputs:
             if not None in chain(*inputs) and not None in chain(*outputs):
                 transaction = Transaction(hash, inputs, outputs, fee)
                 transaction_data.append(transaction)

@@ -31,3 +31,7 @@ MATCH (:Address {candidate: true}) WITH COUNT(*) AS candidateCount
 MATCH (addr:Address {candidate: true})
 WHERE rand() < 2000.0 / candidateCount
 SET addr.selected = true;
+
+
+
+
