@@ -188,11 +188,10 @@ if __name__ == '__main__':
         transactions = load_transactions_from_csv(f'{input_directory}{file}')
         print('done')
 
-        separable_txs = [tx for tx in transactions if tx.type == 'separable']
-
-        untangled_txs = pool.map(func, separable_txs)
-
+        print('untangling transactions... ', end='', flush=True)
+        untangled_txs = pool.map(func, transactions)
         untangled_txs = [item for sublist in untangled_txs for item in sublist]
+        print('done')
 
         # flat_txs = []
         # if untangled_txs:
@@ -205,7 +204,7 @@ if __name__ == '__main__':
         #     if 'separable' in str:
         #         print(f'    {str}')
         
-        print(f'    writing new csv file {output_directory}{file}...', end='', flush=True)
+        print(f'    writing new csv file {output_directory}{file}... ', end='', flush=True)
         with open(f'{output_directory}{file}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
             for transaction in transactions:
@@ -213,7 +212,7 @@ if __name__ == '__main__':
         print('done')
 
         untangle_end = perf_counter()
-        print(f'finished in {untangle_end - untangle_start:.2f}s\n')
+        print(f'    finished in {untangle_end - untangle_start:.2f}s\n')
 
 
     program_end = perf_counter()
