@@ -93,13 +93,9 @@ def simplify(transaction):
 		new_num_outputs = len(transaction.outputs)
 
 		if new_num_inputs != old_num_inputs or new_num_outputs != old_num_outputs:
-			global num_simplified
-			num_simplified += 1
 			transaction.type = 'unclassified'
 
 	return transaction
-
-num_simplified = 0
 
 if __name__ == '__main__':
 	num_processes = mp.cpu_count()
@@ -125,15 +121,14 @@ if __name__ == '__main__':
 
 		print(f'    simplifying transactions... ', end='', flush=True)
 		simplified_transactions = pool.map(simplify, transactions)
-		print(f'done ({num_simplified} transactions simplified)')
-		num_simplified = 0
+		print(f'done')
 
-		print(f'    writing new csv file... {output_directory}{file_name}', end='', flush=True)
+		print(f'    writing new csv file {output_directory}{file_name}... ', end='', flush=True)
 		with open(f'{output_directory}{file_name}', 'w') as output_file:
 			output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
 			for transaction in transactions:
 				output_file.write(transaction.to_csv_string())
-		print('    done')
+		print('done')
 
 		simp_end = perf_counter()
 		print(f'    finished in {simp_end - simp_start:.2f}s\n')
