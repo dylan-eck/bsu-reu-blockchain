@@ -84,7 +84,6 @@ def simplify(transaction):
 		old_num_inputs = len(transaction.inputs)
 		old_num_outputs = len(transaction.outputs)
 
-
 		transaction = consolodate_same_addresses(transaction)
 		transaction = remove_small_inputs(transaction)
 		transaction = remove_small_outputs(transaction)
@@ -121,6 +120,7 @@ if __name__ == '__main__':
 
 		print(f'    simplifying transactions... ', end='', flush=True)
 		simplified_transactions = pool.map(simplify, transactions)
+		simplified_transactions = [tx for tx in simplified_transactions if not tx.type == 'intractable']
 		print(f'done')
 
 		print(f'    writing new csv file {output_directory}{file_name}... ', end='', flush=True)

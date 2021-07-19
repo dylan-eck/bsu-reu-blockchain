@@ -1,6 +1,7 @@
 from time import perf_counter
 from itertools import permutations
 import multiprocessing as mp
+import os
 
 from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv
@@ -163,6 +164,7 @@ def transactions_from_partitions(transaction, partitions):
     return transactions
 
 def func(transaction):
+    print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
     partitions = get_acceptable_partitions(transaction)
     sub_transactions = transactions_from_partitions(transaction, partitions)
     return sub_transactions
@@ -171,12 +173,15 @@ if __name__ == '__main__':
     program_start = perf_counter()
 
     num_processes = mp.cpu_count()
-    pool = mp.Pool(processes=num_processes)
+    pool = mp.Pool(processes=2)
     print(f'found {num_processes} available threads\n')
 
     csv_file_directory = '../csv_files/'
     input_directory = f'{csv_file_directory}simplified_transactions/'
     output_directory = f'{csv_file_directory}untangled_transactions/'
+
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
 
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
@@ -192,17 +197,6 @@ if __name__ == '__main__':
         untangled_txs = pool.map(func, transactions)
         untangled_txs = [item for sublist in untangled_txs for item in sublist]
         print('done')
-
-        # flat_txs = []
-        # if untangled_txs:
-        #     for index, tx_list in enumerate(untangled_txs):
-        #         from classify import classify
-        #         untangled_txs[index] = [classify(tx) for tx in tx_list]
-
-        # for item in untangled_txs:
-        #     str = [x.type for x in item]
-        #     if 'separable' in str:
-        #         print(f'    {str}')
         
         print(f'    writing new csv file {output_directory}{file}... ', end='', flush=True)
         with open(f'{output_directory}{file}', 'w') as output_file:
