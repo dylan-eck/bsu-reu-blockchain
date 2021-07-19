@@ -80,8 +80,6 @@ def remove_small_outputs(transaction):
 	return transaction
 
 def simplify(transaction):
-	type = transaction.type
-
 	if transaction.type != 'intractable':
 		old_num_inputs = len(transaction.inputs)
 		old_num_outputs = len(transaction.outputs)
@@ -95,6 +93,7 @@ def simplify(transaction):
 		new_num_outputs = len(transaction.outputs)
 
 		if new_num_inputs != old_num_inputs or new_num_outputs != old_num_outputs:
+			print(f'    simplified transaction {transaction.hash}')
 			transaction.type = 'unclassified'
 
 	return transaction
@@ -120,7 +119,7 @@ for file_name in csv_file_names:
 	transactions = load_transactions_from_csv(f'{input_directory}{file_name}')
 	print(f'{"    loading transactions... done":85}')
 
-	print(f'    simplifying transactions... ', end='', flush=True)
+	print(f'    simplifying transactions... ')
 	simplified_transactions = pool.map(simplify, transactions)
 	print('    done')
 
