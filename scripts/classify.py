@@ -45,7 +45,7 @@ if __name__ == '__main__':
     pool = mp.Pool(processes=num_processes)
     print(f'found {num_processes} available cores\n')
 
-    csv_file_directory = '../csv_files/'
+    csv_file_directory = '../../scratch/csv_files/'
     input_directory = f'{csv_file_directory}raw_transactions_unclassified/'
     output_directory = f'{csv_file_directory}raw_transactions_classified/'
 
@@ -59,6 +59,8 @@ if __name__ == '__main__':
 
     # --- load transactions ---
     for file_name in csv_file_names:
+	file_start = perf_counter()
+
         print(f'processing file {input_directory}{file_name}:')
         print(f'    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}{file_name}')    
@@ -66,14 +68,17 @@ if __name__ == '__main__':
 
         print('    classifying transactions... ')
         classified_transactions = pool.map(classify, transactions)
-        print('done')
+        print('    done')
 
         print(f'    writing new csv file {output_directory}{file_name}... ', end='', flush=True)
         with open(f'{output_directory}{file_name}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
             for transaction in classified_transactions:
                 output_file.write(transaction.to_csv_string())
-        print('done\n')
+        print('done')
+
+        file_end = perf_counter()
+        print(f'finished in {file_end - file_start:.2f}s\n')
 
     program_end = perf_counter()
     execution_time = (program_end-program_start)/60/60
