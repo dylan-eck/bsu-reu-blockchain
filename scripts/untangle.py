@@ -178,6 +178,7 @@ if __name__ == '__main__':
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
     for file in csv_file_names:
+        print(f'processing file {input_directory}{file}:')
         transactions = load_transactions_from_csv(f'{input_directory}{file}')
 
         separable_txs = [tx for tx in transactions if tx.type == 'separable']
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         for item in untangled_txs:
             str = [x.type for x in item]
             if 'separable' in str:
-                print(str)
+                print(f'    {str}')
         
     
     # print(f'    writing new csv file... {output_directory}{file}', end='\r', flush=True)
