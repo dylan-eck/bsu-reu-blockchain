@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
 		print(f'    simplifying transactions... ', end='', flush=True)
 		simplified_transactions = pool.map(simplify, transactions)
-		print(f'done ({num_simplified} transactions simplified)')'
+		print(f'done ({num_simplified} transactions simplified)')
 		num_simplified = 0
 
 		print(f'    writing new csv file... {output_directory}{file_name}', end='', flush=True)
