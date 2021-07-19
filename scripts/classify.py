@@ -16,7 +16,7 @@ def classify(transaction):
     try:
         if transaction.type == 'unclassified':
 
-                tx_size_limit = 7
+                tx_size_limit = 8
                 if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
                     transaction.type = 'simple'
 
