@@ -17,7 +17,10 @@ def classify(transaction):
         if transaction.type == 'unclassified':
 
                 tx_size_limit = 8
-                if len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
+                if transaction.inputs = [('coinbase','')]:
+                    transaction.type = 'simple'
+
+                elif len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
                     transaction.type = 'simple'
 
                 elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
