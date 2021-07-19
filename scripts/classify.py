@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     num_processes = mp.cpu_count()
     pool = mp.Pool(processes=num_processes)
-    print(f'found {num_processes} available cores\n')
+    print(f'found {num_processes} available threads\n')
 
     csv_file_directory = '../../scratch/csv_files/'
     input_directory = f'{csv_file_directory}raw_transactions_unclassified/'
