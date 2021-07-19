@@ -103,7 +103,7 @@ num_processes = mp.cpu_count()
 pool = mp.Pool(processes=num_processes)
 print(f'found {num_processes} available threads\n')
 
-csv_file_directory = '../csv_files/'
+csv_file_directory = '../../scratch/csv_files/'
 input_directory = f'{csv_file_directory}raw_transactions_classified/'
 output_directory = f'{csv_file_directory}simplified_transactions/'
 
@@ -132,4 +132,4 @@ for file_name in csv_file_names:
 	print('    done')
 
 	simp_end = perf_counter()
-	print(f'    finished in {simp_end - simp_start}s\n')
+	print(f'    finished in {simp_end - simp_start:.2f}s\n')
