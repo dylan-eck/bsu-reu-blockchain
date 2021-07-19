@@ -126,7 +126,7 @@ if __name__ == '__main__':
 		print(f'    writing new csv file {output_directory}{file_name}... ', end='', flush=True)
 		with open(f'{output_directory}{file_name}', 'w') as output_file:
 			output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-			for transaction in transactions:
+			for transaction in simplified_transactions:
 				output_file.write(transaction.to_csv_string())
 		print('done')
 
