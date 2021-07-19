@@ -188,16 +188,16 @@ if __name__ == '__main__':
         transactions = load_transactions_from_csv(f'{input_directory}{file}')
         print('done')
 
-        print('untangling transactions... ', end='', flush=True)
+        print('    untangling transactions... ', end='', flush=True)
         untangled_txs = pool.map(func, transactions)
         untangled_txs = [item for sublist in untangled_txs for item in sublist]
         print('done')
 
-        # flat_txs = []
-        # if untangled_txs:
-        #     for index, tx_list in enumerate(untangled_txs):
-        #         from classify import classify
-        #         untangled_txs[index] = [classify(tx) for tx in tx_list]
+        flat_txs = []
+        if untangled_txs:
+            for index, tx_list in enumerate(untangled_txs):
+                from classify import classify
+                untangled_txs[index] = [classify(tx) for tx in tx_list]
 
         # for item in untangled_txs:
         #     str = [x.type for x in item]
