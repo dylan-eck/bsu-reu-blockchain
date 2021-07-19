@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     # --- load transactions ---
     for file_name in csv_file_names:
-	file_start = perf_counter()
+        file_start = perf_counter()
 
         print(f'processing file {input_directory}{file_name}:')
         print(f'    loading transactions... ', end='', flush=True)
