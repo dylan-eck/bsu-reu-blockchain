@@ -102,7 +102,7 @@ if __name__ == '__main__':
 	pool = mp.Pool(processes=num_processes)
 	print(f'found {num_processes} available threads\n')
 
-	csv_file_directory = '../../scratch/csv_files/'
+	csv_file_directory = '../csv_files/'
 	input_directory = f'{csv_file_directory}raw_transactions_classified/'
 	output_directory = f'{csv_file_directory}simplified_transactions/'
 
