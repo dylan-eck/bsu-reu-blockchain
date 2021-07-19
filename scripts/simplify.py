@@ -93,42 +93,47 @@ def simplify(transaction):
 		new_num_outputs = len(transaction.outputs)
 
 		if new_num_inputs != old_num_inputs or new_num_outputs != old_num_outputs:
-			print(f'    simplified transaction {transaction.hash}')
+			global num_simplified
+			num_simplified += 1
 			transaction.type = 'unclassified'
 
 	return transaction
 
-num_processes = mp.cpu_count()
-pool = mp.Pool(processes=num_processes)
-print(f'found {num_processes} available threads\n')
+num_simplified = 0
 
-csv_file_directory = '../../scratch/csv_files/'
-input_directory = f'{csv_file_directory}raw_transactions_classified/'
-output_directory = f'{csv_file_directory}simplified_transactions/'
+if __name__ == '__main__':
+	num_processes = mp.cpu_count()
+	pool = mp.Pool(processes=num_processes)
+	print(f'found {num_processes} available threads\n')
 
-if not os.path.exists(output_directory):
-	os.mkdir(output_directory)
+	csv_file_directory = '../../scratch/csv_files/'
+	input_directory = f'{csv_file_directory}raw_transactions_classified/'
+	output_directory = f'{csv_file_directory}simplified_transactions/'
 
-csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+	if not os.path.exists(output_directory):
+		os.mkdir(output_directory)
 
-for file_name in csv_file_names:
-	simp_start = perf_counter()
+	csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
 
-	print(f'processing file {file_name}:')
-	print('    loading transactions... ', end='\r', flush=True)
-	transactions = load_transactions_from_csv(f'{input_directory}{file_name}')
-	print(f'{"    loading transactions... done":85}')
+	for file_name in csv_file_names:
+		simp_start = perf_counter()
 
-	print(f'    simplifying transactions... ')
-	simplified_transactions = pool.map(simplify, transactions)
-	print('    done')
+		print(f'processing file {file_name}:')
+		print('    loading transactions... ', end='\r', flush=True)
+		transactions = load_transactions_from_csv(f'{input_directory}{file_name}')
+		print(f'{"    loading transactions... done":85}')
 
-	print(f'    writing new csv file... {output_directory}{file_name}', end='', flush=True)
-	with open(f'{output_directory}{file_name}', 'w') as output_file:
-		output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-		for transaction in transactions:
-			output_file.write(transaction.to_csv_string())
-	print('    done')
+		print(f'    simplifying transactions... ', end='', flush=True)
+		simplified_transactions = pool.map(simplify, transactions)
+		print(f'done ({num_simplified} transactions simplified)')'
+		num_simplified = 0
 
-	simp_end = perf_counter()
-	print(f'    finished in {simp_end - simp_start:.2f}s\n')
+		print(f'    writing new csv file... {output_directory}{file_name}', end='', flush=True)
+		with open(f'{output_directory}{file_name}', 'w') as output_file:
+			output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
+			for transaction in transactions:
+				output_file.write(transaction.to_csv_string())
+		print('    done')
+
+		simp_end = perf_counter()
+		print(f'    finished in {simp_end - simp_start:.2f}s\n')
