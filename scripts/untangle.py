@@ -10,7 +10,7 @@ if __name__ == '__main__':
     program_start = perf_counter()
 
     num_processes = mp.cpu_count()
-    pool = mp.Pool(processes=2)
+    pool = mp.Pool(processes=num_processes)
     print(f'found {num_processes} available threads\n')
 
     csv_file_directory = '../csv_files/'
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         print(f'    writing new csv file {output_directory}{file}... ', end='', flush=True)
         with open(f'{output_directory}{file}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-            for transaction in transactions:
+            for transaction in untangled_txs:
                 output_file.write(transaction.to_csv_string())
         print('done')
 
