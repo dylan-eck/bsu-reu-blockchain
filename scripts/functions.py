@@ -203,10 +203,16 @@ def transactions_from_partitions(transaction, partitions):
     return transactions
 
 def func(transaction):
+    print(f'    untangling transactions... [{os.getpid()}] {transaction.hash}', end='\r', flush=True)
+
     # print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
-    partitions = get_acceptable_partitions(transaction)
-    sub_transactions = transactions_from_partitions(transaction, partitions)
-    return sub_transactions
+    if transaction.type == 'separable':
+        partitions = get_acceptable_partitions(transaction)
+        sub_transactions = transactions_from_partitions(transaction, partitions)
+        return sub_transactions
+
+    else:
+        return [transaction]
 
 # --- transaction simplification ---
 
@@ -336,6 +342,7 @@ def classify(transaction):
 
 def profile(transactions):
     type_dict = {
+        'total': 0,
         'unclassified': 0,
         'simple': 0,
         'separable': 0,
@@ -344,6 +351,7 @@ def profile(transactions):
     }
 
     for transaction in transactions:
+        type_dict['total'] += 1
         type_dict[transaction.type] += 1
 
     return type_dict
