@@ -9,4 +9,5 @@ test.py
 scripts/temp.py
 .vscode
 untangle_r2_job
+*.pickle
 
