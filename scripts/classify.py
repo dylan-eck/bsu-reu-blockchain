@@ -9,37 +9,7 @@ from time import perf_counter
 import multiprocessing as mp
 import os
 
-from functions import get_file_names, load_transactions_from_csv
-from untangle import untangle
-
-def classify(transaction):
-    try:
-        if transaction.type == 'unclassified':
-
-                tx_size_limit = 8
-                if transaction.inputs == [('coinbase','')]:
-                    transaction.type = 'simple'
-
-                elif len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
-                    transaction.type = 'simple'
-
-                elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
-                    transaction.type = 'intractable'
-
-                else:
-                    partitions = untangle(transaction)
-                    num_partitions = len(partitions)
-                    if partitions:
-                        if num_partitions == 1:
-                            transaction.type = 'separable'
-                        else:
-                            transaction.type = 'ambiguous'
-                    else:
-                        transaction.type = 'simple'
-    except:
-        print(f'        failed to simplify transaction {transaction.hash}')
-
-    return transaction
+from functions import get_file_names, load_transactions_from_csv, classify
 
 if __name__ == '__main__':
     program_start = perf_counter()
