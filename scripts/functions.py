@@ -331,3 +331,19 @@ def classify(transaction):
         print(f'        failed to simplify transaction {transaction.hash}')
 
     return transaction
+
+# --- misc ---
+
+def profile(transactions):
+    type_dict = {
+        'unclassified': 0,
+        'simple': 0,
+        'separable': 0,
+        'ambiguous': 0,
+        'intractable': 0
+    }
+
+    for transaction in transactions:
+        type_dict[transaction.type] += 1
+
+    return type_dict
