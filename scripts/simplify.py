@@ -116,7 +116,7 @@ if __name__ == '__main__':
 		print(f'processing file {file_name}:')
 		print('    loading transactions... ', end='\r', flush=True)
 		transactions = load_transactions_from_csv(f'{input_directory}{file_name}')
-		print(f'{"    loading transactions... done":85}')
+		print(f'{"done":85}')
 
 		print(f'    simplifying transactions... ', end='', flush=True)
 		simplified_transactions = pool.map(simplify, transactions)

@@ -164,7 +164,7 @@ def transactions_from_partitions(transaction, partitions):
     return transactions
 
 def func(transaction):
-    print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
+    # print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
     partitions = get_acceptable_partitions(transaction)
     sub_transactions = transactions_from_partitions(transaction, partitions)
     return sub_transactions
@@ -197,7 +197,12 @@ if __name__ == '__main__':
         untangled_txs = pool.map(func, transactions)
         untangled_txs = [item for sublist in untangled_txs for item in sublist]
         print('done')
+
+        # print(f'    separable txs? {any(tx.type == "separable" for tx in untangled_txs)}')
         
+        for tx in untangled_txs:
+            print(tx.type)
+
         print(f'    writing new csv file {output_directory}{file}... ', end='', flush=True)
         with open(f'{output_directory}{file}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
@@ -207,7 +212,6 @@ if __name__ == '__main__':
 
         untangle_end = perf_counter()
         print(f'    finished in {untangle_end - untangle_start:.2f}s\n')
-
 
     program_end = perf_counter()
     print(f'execution finished in {program_end - program_start:.2f}s')
