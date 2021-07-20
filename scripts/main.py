@@ -1,14 +1,10 @@
-import collections
-from typing import List, Tuple
 import argparse
-import sys
-import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input',
                     dest='input_directory',
                     type=str,
-                    help='a directory containing theinput files'
+                    help='a directory containing the input files'
                     )
 
 parser.add_argument('-o', '-output',
