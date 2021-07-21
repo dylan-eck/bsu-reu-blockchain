@@ -203,7 +203,7 @@ def transactions_from_partitions(transaction, partitions):
     return transactions
 
 def func(transaction):
-    print(f'    untangling transactions... [{os.getpid()}] {transaction.hash}', end='\r', flush=True)
+    # print(f'    untangling transactions... [{os.getpid()}] {transaction.hash}', end='\r', flush=True)
 
     # print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
     if transaction.type == 'separable':

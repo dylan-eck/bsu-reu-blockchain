@@ -4,6 +4,7 @@ import os
 from create_transactions_csv import create_transactions_csv
 from classify import classify_transactions
 from simplify import simplify_transactions
+from untangle import untangle_transactions
 
 # --- command line interface ---
 parser = argparse.ArgumentParser()
@@ -59,7 +60,7 @@ if not os.path.exists(output_directory):
 
 filler = '-'
 
-# --- create raw transaction csv files ---
+# create raw transaction csv files
 print(f'{"":{filler}<79}')
 print('creating raw transaction csv files:')
 print(f'{"":{filler}<79}\n')
@@ -68,7 +69,7 @@ create_transactions_csv(input_directory, output_directory)
 
 print()
 
-# --- perform initial classification of raw transactions ---
+# perform initial classification of raw transactions
 print(f'{"":{filler}<79}')
 print('classifying raw transactions and creating new csv files:')
 print(f'{"":{filler}<79}\n')
@@ -77,11 +78,20 @@ classify_transactions(output_directory)
 
 print()
 
-# --- simplify transactions ---
+# simplify transactions 
 print(f'{"":{filler}<79}')
 print('simplifying transactions:')
 print(f'{"":{filler}<79}\n')
 
 simplify_transactions(output_directory)
+
+print()
+
+# untangle transactions
+print(f'{"":{filler}<79}')
+print('untangling transactions:')
+print(f'{"":{filler}<79}\n')
+
+untangle_transactions(output_directory)
 
 print()
