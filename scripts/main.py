@@ -2,6 +2,7 @@ import argparse
 import os
 
 from create_transactions_csv import create_transactions_csv
+from classify import classify_transactions
 
 # --- command line interface ---
 parser = argparse.ArgumentParser()
@@ -55,12 +56,25 @@ if not os.path.exists(input_directory):
 if not os.path.exists(output_directory):
     os.mkdir(output_directory)
 
+filler = '-'
+
 # --- create raw transaction csv files ---
-print('creating raw transaction csv files:\n')
+print(f'{"":{filler}<79}')
+print('creating raw transaction csv files:')
+print(f'{"":{filler}<79}\n')
+
 create_transactions_csv(input_directory, output_directory)
 print()
 
 # --- perform initial classification of raw transactions ---
-print('classifying raw transactions:\n')
+print(f'{"":{filler}<79}')
+print('classifying raw transactions and creating new csv files:')
+print(f'{"":{filler}<79}\n')
 
+classify_transactions(output_directory)
+print()
 
+# --- simplify transactions ---
+print(f'{"":{filler}<79}')
+print('simplifying transactions:')
+print(f'{"":{filler}<79}\n')

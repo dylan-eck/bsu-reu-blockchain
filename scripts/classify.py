@@ -11,22 +11,25 @@ import os
 
 from functions import get_file_names, load_transactions_from_csv, classify
 
-if __name__ == '__main__':
+def classify_transactions(csv_files_directory):
     program_start = perf_counter()
+
+    indent = ''
+    if __name__ != '__main__':
+        indent = '    '
 
     num_processes = mp.cpu_count()
     pool = mp.Pool(processes=num_processes)
-    print(f'found {num_processes} available threads\n')
+    print(f'{indent}found {num_processes} available threads\n')
 
-    csv_file_directory = '../csv_files/'
-    input_directory = f'{csv_file_directory}raw_transactions_unclassified/'
-    output_directory = f'{csv_file_directory}raw_transactions_classified/'
+    input_directory = f'{csv_files_directory}/raw_transactions_unclassified'
+    output_directory = f'{csv_files_directory}/raw_transactions_classified'
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
     # --- locate csv files ---
-    print('locating csv files... ', end='', flush=True)
+    print(f'{indent}locating csv files... ', end='', flush=True)
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
     print('done\n')
 
@@ -34,25 +37,28 @@ if __name__ == '__main__':
     for file_name in csv_file_names:
         file_start = perf_counter()
 
-        print(f'processing file {input_directory}{file_name}:')
-        print(f'    loading transactions... ', end='', flush=True)
-        transactions = load_transactions_from_csv(f'{input_directory}{file_name}')    
+        print(f'{indent}processing file {input_directory}/{file_name}:')
+        print(f'{indent}    loading transactions... ', end='', flush=True)
+        transactions = load_transactions_from_csv(f'{input_directory}/{file_name}')    
         print('done')
 
-        print('    classifying transactions... ')
+        print(f'{indent}    classifying transactions... ', end='', flush=True)
         classified_transactions = pool.map(classify, transactions)
-        print('    done')
+        print('done')
 
-        print(f'    writing new csv file {output_directory}{file_name}... ', end='', flush=True)
-        with open(f'{output_directory}{file_name}', 'w') as output_file:
+        print(f'{indent}    writing new csv file... ', end='', flush=True)
+        with open(f'{output_directory}/{file_name}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
             for transaction in classified_transactions:
                 output_file.write(transaction.to_csv_string())
         print('done')
 
         file_end = perf_counter()
-        print(f'finished in {file_end - file_start:.2f}s\n')
+        print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
 
     program_end = perf_counter()
     execution_time = (program_end-program_start)/60/60
-    print(f'execution time: {execution_time:.2f} hours')
+    print(f'{indent}execution time: {execution_time:.2f} hours')
+
+if __name__ == '__main__':
+    classify_transactions('../csv_files')
