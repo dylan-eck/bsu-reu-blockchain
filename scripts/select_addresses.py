@@ -33,7 +33,7 @@ def select_addresses(data_io_directory, graph_path):
 
     print(f'{indent}writing csv file... ', end='', flush=True)
     output_directory = data_io_directory
-    with open(f'{output_directory}/selected_address', 'w') as output_file:
+    with open(f'{output_directory}/selected_addresses.csv', 'w') as output_file:
         output_file.write('address')
         for address in selected_addresses:
             output_file.write(f'\n{address}')

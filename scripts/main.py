@@ -106,7 +106,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for address selection:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(output_directory)
+construct_graph(f'{output_directory}/raw_transactions_classified', 'selection_graph.pickle')
 
 print()
 
@@ -115,11 +115,18 @@ print(f'{"":{fill_char}<79}')
 print('selecting addresses for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-select_addresses(output_directory, f'{output_directory}/address_graph.pickle')
+select_addresses(output_directory, f'{output_directory}/selection_graph.pickle')
 
 print()
 
 # construct transaction graph for untangled transactions
+print(f'{"":{fill_char}<79}')
+print('constructing address graph for pathfinding:')
+print(f'{"":{fill_char}<79}\n')
+
+construct_graph(f'{output_directory}/untangled_transactions', 'pf_graph.pickle')
+
+print()
 
 # perform pathfinding 
 
@@ -130,5 +137,5 @@ print(f'{"":{fill_char}<79}')
 print('post excution summary:')
 print(f'{"":{fill_char}<79}\n')
 
-print(f'    total execution time: {main_end - main_start:.2f}s')
+print(f'    total execution time: {(main_end - main_start)/60:.2f} minutes')
 print()

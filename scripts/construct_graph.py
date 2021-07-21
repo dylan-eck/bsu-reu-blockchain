@@ -43,7 +43,7 @@ def get_nodes_and_edges(transaction):
 
     return (nodes, edges)
 
-def construct_graph(data_io_directory):
+def construct_graph(input_directory, graph_name):
     program_start = perf_counter()
 
     indent = ''
@@ -55,7 +55,6 @@ def construct_graph(data_io_directory):
     print(f'{indent}found {threads} available threads')
 
     print(f'{indent}locating input files... ', end='',flush=True)
-    input_directory = f'{data_io_directory}/untangled_transactions'
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
     print('done\n')
 
@@ -95,7 +94,7 @@ def construct_graph(data_io_directory):
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
         
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(address_graph, '../data_out/address_graph.pickle')
+    nx.write_gpickle(address_graph, f'../data_out/{graph_name}')
     print('done')
 
     print(f'{indent}added {len(address_graph.nodes):,} nodes and {len(address_graph.edges):,} edges to the address graph')
@@ -104,4 +103,5 @@ def construct_graph(data_io_directory):
     print(f'{indent}execution finished in {program_end-program_start:.2f}s\n')
 
 if __name__ == '__main__':
-    construct_graph('../data_out')
+    input_directory = '../data_out/raw_transactions_classified'
+    construct_graph(input_directory, 'address_graph.pickle')
