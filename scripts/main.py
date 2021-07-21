@@ -3,6 +3,7 @@ import os
 
 from create_transactions_csv import create_transactions_csv
 from classify import classify_transactions
+from simplify import simplify_transactions
 
 # --- command line interface ---
 parser = argparse.ArgumentParser()
@@ -64,6 +65,7 @@ print('creating raw transaction csv files:')
 print(f'{"":{filler}<79}\n')
 
 create_transactions_csv(input_directory, output_directory)
+
 print()
 
 # --- perform initial classification of raw transactions ---
@@ -72,9 +74,14 @@ print('classifying raw transactions and creating new csv files:')
 print(f'{"":{filler}<79}\n')
 
 classify_transactions(output_directory)
+
 print()
 
 # --- simplify transactions ---
 print(f'{"":{filler}<79}')
 print('simplifying transactions:')
 print(f'{"":{filler}<79}\n')
+
+simplify_transactions(output_directory)
+
+print()
