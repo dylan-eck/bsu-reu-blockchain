@@ -24,17 +24,16 @@ def get_day_directories(block_data_directory):
 
     return day_directories
 
-def get_block_file_paths(day_directory):
-    block_file_paths = []
+def get_block_files(day_directory):
+    block_files = []
 
     for (root, dirs, files) in os.walk(day_directory):
         for file in files:
             pattern = re.compile("^[a-z0-9]{64}.json$")
             if pattern.match(file):
-                file_path = os.path.join(root, file)
-                block_file_paths.append(file_path)
+                block_files.append(file)
 
-    return block_file_paths
+    return block_files
 
 def get_inputs(transaction):
     inputs = []
@@ -84,44 +83,54 @@ def get_tx_data(block):
 
     return transaction_data
 
-program_start = perf_counter()
+def create_transactions_csv(block_data_directory, data_output_directory):
+    program_start = perf_counter()
 
-csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
+    indent = ''
+    if __name__ != '__main__':
+        indent = '    '
 
-output_directory = '../csv_files/raw_transactions_unclassified/'
-if not os.path.exists(output_directory):
-    os.mkdir(output_directory)
 
-block_data_directory = '../block_data/'
-day_directories = get_day_directories(block_data_directory)
+    input_directory = block_data_directory
+    day_directories = get_day_directories(input_directory)
 
-for directory in day_directories:
-    block_file_paths = get_block_file_paths(block_data_directory + directory)
+    output_directory = f'{data_output_directory}/raw_transactions_unclassified'
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
 
-    print('processing blocks... ', end='\r', flush=True)
-    transactions = []
-    for file_path in block_file_paths:
-        with open(file_path) as input_file:
-            block = json.load(input_file)
-            transactions += get_tx_data(block)
+    for directory_name in day_directories:
+        day_start = perf_counter()
 
-            block_hash = block['hash']
-            print(f'processing blocks... {block_hash}', end='\r', flush=True)
-    print(f'{"processing blocks... done":<85}')
+        print(f'{indent}processing day {directory_name}:\n')
 
-    out_file_name =f'{output_directory}{directory}.csv'
-    if os.path.exists(out_file_name):
-        os.remove(out_file_name)
+        print(f'{indent}    locating block files... ', end='', flush=True)
+        block_files = get_block_files(f'{input_directory}/{directory_name}')
+        print('done')
 
-    print(f'writing file {directory}.csv')
-    with open(out_file_name, 'w') as output_file:
-        output_file.write(csv_headers)
-        for transaction in transactions:
-            try:
-                output_file.write(f'{transaction.to_csv_string()}')
-            except:
-                print(f'failed to write transaction {transaction.hash}')
+        transactions = []
+        for file_name in block_files:
+            with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
+                block = json.load(input_file)
+                transactions += get_tx_data(block)
 
-program_end = perf_counter()
-execution_time_s = program_end - program_start
-print(f'execution finished in {execution_time_s/60:.2f} minutes')
+                print(f'{indent}    processing blocks... {block["hash"]}', end='\r', flush=True)
+        print(f'{f"{indent}    processing blocks... done":<100}')
+
+        print(f'{indent}    writing new csv file... ', end='', flush=True)
+        out_file_name =f'{output_directory}/{directory_name}.csv'
+        with open(out_file_name, 'w') as output_file:
+            csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
+            output_file.write(csv_headers)
+            for transaction in transactions:
+                output_file.write(transaction.to_csv_string())
+        print('done')
+
+        day_end = perf_counter()
+        print(f'{indent}    finished in {day_end - day_start:.2f}s\n')
+
+    program_end = perf_counter()
+    execution_time_s = program_end - program_start
+    print(f'{indent}execution finished in {execution_time_s/60:.2f} minutes')
+
+if __name__ == '__main__':
+    create_transactions_csv('../block_data', '../csv_files')

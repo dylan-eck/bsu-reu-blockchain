@@ -1,5 +1,7 @@
-from datetime import datetime
 import argparse
+import os
+
+from create_transactions_csv import create_transactions_csv
 
 # --- command line interface ---
 parser = argparse.ArgumentParser()
@@ -44,5 +46,21 @@ if args.output_directory:
 else:
     output_directory = DEFUALT_OUTPUT_DIRECTORY
     print(f'using default output directory {output_directory}')
+print()
+
+# create input and output directories if they do not already exist
+if not os.path.exists(input_directory):
+    os.mkdir(input_directory)
+
+if not os.path.exists(output_directory):
+    os.mkdir(output_directory)
 
 # --- create raw transaction csv files ---
+print('creating raw transaction csv files:\n')
+create_transactions_csv(input_directory, output_directory)
+print()
+
+# --- perform initial classification of raw transactions ---
+print('classifying raw transactions:\n')
+
+
