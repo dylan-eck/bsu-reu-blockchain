@@ -7,6 +7,7 @@ from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
 from construct_graph import construct_graph
+from select_addresses import select_addresses
 
 main_start = perf_counter()
 
@@ -110,6 +111,13 @@ construct_graph(output_directory)
 print()
 
 # select addresses to be used for path finding
+print(f'{"":{fill_char}<79}')
+print('selecting addresses for pathfinding:')
+print(f'{"":{fill_char}<79}\n')
+
+select_addresses(output_directory, f'{output_directory}/address_graph.pickle')
+
+print()
 
 # construct transaction graph for untangled transactions
 
