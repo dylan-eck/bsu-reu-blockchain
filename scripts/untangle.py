@@ -6,7 +6,7 @@ import os
 from transaction import Transaction
 from functions import get_file_names, load_transactions_from_csv, func, classify, profile
 
-def untangle_transactions(csv_files_directory):
+def untangle_transactions(data_io_directory):
     program_start = perf_counter()
 
     indent = ''
@@ -17,8 +17,8 @@ def untangle_transactions(csv_files_directory):
     pool = mp.Pool(processes=num_processes)
     print(f'{indent}found {num_processes} available threads\n')
 
-    input_directory = f'{csv_files_directory}/simplified_transactions'
-    output_directory = f'{csv_files_directory}/untangled_transactions'
+    input_directory = f'{data_io_directory}/simplified_transactions'
+    output_directory = f'{data_io_directory}/untangled_transactions'
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)

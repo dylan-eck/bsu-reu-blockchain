@@ -11,7 +11,7 @@ import os
 
 from functions import get_file_names, load_transactions_from_csv, classify
 
-def classify_transactions(csv_files_directory):
+def classify_transactions(data_io_directory):
     program_start = perf_counter()
 
     indent = ''
@@ -22,8 +22,8 @@ def classify_transactions(csv_files_directory):
     pool = mp.Pool(processes=num_processes)
     print(f'{indent}found {num_processes} available threads\n')
 
-    input_directory = f'{csv_files_directory}/raw_transactions_unclassified'
-    output_directory = f'{csv_files_directory}/raw_transactions_classified'
+    input_directory = f'{data_io_directory}/raw_transactions_unclassified'
+    output_directory = f'{data_io_directory}/raw_transactions_classified'
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)

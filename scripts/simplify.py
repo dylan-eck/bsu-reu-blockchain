@@ -4,7 +4,7 @@ import os
 
 from functions import classify, get_file_names, load_transactions_from_csv, simplify, profile
 
-def simplify_transactions(csv_files_directory):
+def simplify_transactions(data_io_directory):
 
     indent = ''
     if __name__ != '__main__':
@@ -14,8 +14,8 @@ def simplify_transactions(csv_files_directory):
     pool = mp.Pool(processes=num_processes)
     print(f'{indent}found {num_processes} available threads\n')
 
-    input_directory = f'{csv_files_directory}/raw_transactions_classified'
-    output_directory = f'{csv_files_directory}/simplified_transactions'
+    input_directory = f'{data_io_directory}/raw_transactions_classified'
+    output_directory = f'{data_io_directory}/simplified_transactions'
 
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)

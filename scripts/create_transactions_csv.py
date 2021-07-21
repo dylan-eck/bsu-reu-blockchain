@@ -83,7 +83,7 @@ def get_tx_data(block):
 
     return transaction_data
 
-def create_transactions_csv(block_data_directory, data_output_directory):
+def create_transactions_csv(block_data_directory, data_io_directory):
     program_start = perf_counter()
 
     indent = ''
@@ -94,7 +94,7 @@ def create_transactions_csv(block_data_directory, data_output_directory):
     input_directory = block_data_directory
     day_directories = get_day_directories(input_directory)
 
-    output_directory = f'{data_output_directory}/raw_transactions_unclassified'
+    output_directory = f'{data_io_directory}/raw_transactions_unclassified'
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 

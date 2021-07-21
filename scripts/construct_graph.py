@@ -2,8 +2,21 @@ from time import perf_counter
 import multiprocessing as mp
 import networkx as nx
 
-from functions import get_file_names, load_transactions_from_csv, profile, get_edges
-                
+from functions import get_file_names, load_transactions_from_csv, profile
+
+def get_edges(transaction):
+    input_addresses = [input[0] for input in transaction.inputs]
+    output_addresses = [output[0] for output in transaction.outputs]
+
+    # only add egdes for simple transactions 
+    # (the untangled data should not contain any separable transactions)
+    edges = []
+    if transaction.type == 'simple':
+        for i in input_addresses:
+            for j in output_addresses:
+                edges.append((i,j))
+    return edges
+
 if __name__ == '__main__':
     program_start = perf_counter()
 
@@ -46,7 +59,7 @@ if __name__ == '__main__':
         print(f'    finished in {file_end - file_start:.2f}s\n')
         
     print('writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(address_graph, '../address_graph.pickle')
+    nx.write_gpickle(address_graph, '../data_out/address_graph.pickle')
     print('done')
 
     print(f'added {len(address_graph.nodes):,} nodes and {len(address_graph.edges):,} edges to the address graph')

@@ -61,52 +61,58 @@ if not os.path.exists(input_directory):
 if not os.path.exists(output_directory):
     os.mkdir(output_directory)
 
-filler = '-'
+fill_char = '-'
 
 # create raw transaction csv files
-print(f'{"":{filler}<79}')
+print(f'{"":{fill_char}<79}')
 print('creating raw transaction csv files:')
-print(f'{"":{filler}<79}\n')
+print(f'{"":{fill_char}<79}\n')
 
 create_transactions_csv(input_directory, output_directory)
 
 print()
 
 # perform initial classification of raw transactions
-print(f'{"":{filler}<79}')
+print(f'{"":{fill_char}<79}')
 print('classifying raw transactions and creating new csv files:')
-print(f'{"":{filler}<79}\n')
+print(f'{"":{fill_char}<79}\n')
 
 classify_transactions(output_directory)
 
 print()
 
 # simplify transactions 
-print(f'{"":{filler}<79}')
+print(f'{"":{fill_char}<79}')
 print('simplifying transactions:')
-print(f'{"":{filler}<79}\n')
+print(f'{"":{fill_char}<79}\n')
 
 simplify_transactions(output_directory)
 
 print()
 
 # untangle transactions
-print(f'{"":{filler}<79}')
+print(f'{"":{fill_char}<79}')
 print('untangling transactions:')
-print(f'{"":{filler}<79}\n')
+print(f'{"":{fill_char}<79}\n')
 
 untangle_transactions(output_directory)
 
 print()
 
-# create transaction graph for classified raw transactions
+# construct transaction graph for classified raw transactions
+
+# select addresses to be used for path finding
+
+# construct transaction graph for untangled transactions
+
+# perform pathfinding 
 
 # display information about main.py execution
 main_end = perf_counter()
 
-print(f'{"":{filler}<79}')
+print(f'{"":{fill_char}<79}')
 print('post excution summary:')
-print(f'{"":{filler}<79}\n')
+print(f'{"":{fill_char}<79}\n')
 
 print(f'    total execution time: {main_end - main_start:.2f}s')
 print()

@@ -355,16 +355,3 @@ def profile(transactions):
         type_dict[transaction.type] += 1
 
     return type_dict
-
-# --- graph functions ---
-
-def get_edges(transaction):
-    input_addresses = [input[0] for input in transaction.inputs]
-    output_addresses = [output[0] for output in transaction.outputs]
-
-    edges = []
-    if transaction.type == 'simple':
-        for i in input_addresses:
-            for j in output_addresses:
-                edges.append((i,j))
-    return edges
