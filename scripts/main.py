@@ -1,3 +1,4 @@
+from time import perf_counter
 import argparse
 import os
 
@@ -5,6 +6,8 @@ from create_transactions_csv import create_transactions_csv
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
+
+main_start = perf_counter()
 
 # --- command line interface ---
 parser = argparse.ArgumentParser()
@@ -94,4 +97,16 @@ print(f'{"":{filler}<79}\n')
 
 untangle_transactions(output_directory)
 
+print()
+
+# create transaction graph for classified raw transactions
+
+# display information about main.py execution
+main_end = perf_counter()
+
+print(f'{"":{filler}<79}')
+print('post excution summary:')
+print(f'{"":{filler}<79}\n')
+
+print(f'    total execution time: {main_end - main_start:.2f}s')
 print()
