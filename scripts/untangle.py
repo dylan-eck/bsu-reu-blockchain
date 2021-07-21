@@ -68,4 +68,4 @@ def untangle_transactions(data_io_directory):
     print(f'{indent}execution finished in {program_end - program_start:.2f}s')
 
 if __name__ == '__main__':
-    untangle_transactions('../csv_files')
+    untangle_transactions('../data_out')

@@ -61,4 +61,4 @@ def simplify_transactions(data_io_directory):
         print(f'{indent}    finished in {simp_end - simp_start:.2f}s\n')
 
 if __name__ == '__main__':
-    simplify_transactions('../csv_files')
+    simplify_transactions('../data_out')

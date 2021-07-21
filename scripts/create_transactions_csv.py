@@ -133,4 +133,4 @@ def create_transactions_csv(block_data_directory, data_io_directory):
     print(f'{indent}execution finished in {execution_time_s/60:.2f} minutes')
 
 if __name__ == '__main__':
-    create_transactions_csv('../block_data', '../csv_files')
+    create_transactions_csv('../block_data', '../data_out')

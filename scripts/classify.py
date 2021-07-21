@@ -61,4 +61,4 @@ def classify_transactions(data_io_directory):
     print(f'{indent}execution time: {execution_time:.2f} hours')
 
 if __name__ == '__main__':
-    classify_transactions('../csv_files')
+    classify_transactions('../data_out')

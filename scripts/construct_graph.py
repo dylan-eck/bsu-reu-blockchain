@@ -17,7 +17,7 @@ def get_edges(transaction):
                 edges.append((i,j))
     return edges
 
-if __name__ == '__main__':
+def construct_graph(data_io_directory):
     program_start = perf_counter()
 
     threads = mp.cpu_count()
@@ -66,3 +66,6 @@ if __name__ == '__main__':
 
     program_end = perf_counter()
     print(f'execution finished in {program_end-program_start:.2f}s')
+
+if __name__ == '__main__':
+    construct_graph('../data_out')
