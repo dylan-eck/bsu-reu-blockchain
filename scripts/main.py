@@ -6,6 +6,7 @@ from create_transactions_csv import create_transactions_csv
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
+from construct_graph import construct_graph
 
 main_start = perf_counter()
 
@@ -100,6 +101,13 @@ untangle_transactions(output_directory)
 print()
 
 # construct transaction graph for classified raw transactions
+print(f'{"":{fill_char}<79}')
+print('constructing address graph for address selection:')
+print(f'{"":{fill_char}<79}\n')
+
+construct_graph(output_directory)
+
+print()
 
 # select addresses to be used for path finding
 
