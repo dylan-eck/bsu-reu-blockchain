@@ -9,7 +9,7 @@ from untangle import untangle_transactions
 
 main_start = perf_counter()
 
-# --- command line interface ---
+# command line interface
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input',
                     dest='input_directory',
@@ -37,7 +37,7 @@ parser.add_argument('-e', '--end',
 args = parser.parse_args()
 
 DEFAULT_INPUT_DIRECTORY = '../block_data'
-DEFUALT_OUTPUT_DIRECTORY = '../csv_files'
+DEFUALT_OUTPUT_DIRECTORY = '../data_out'
 
 if args.input_directory:
     input_directory = args.input_directory
