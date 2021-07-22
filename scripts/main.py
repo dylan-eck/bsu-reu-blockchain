@@ -135,7 +135,7 @@ print(f'{"":{fill_char}<79}')
 print('finding paths between addresses:')
 print(f'{"":{fill_char}<79}\n')
 
-find_paths(data_io_directory,f'{data_io_directory}/path_matrix.pickle')
+find_paths(data_io_directory,f'{data_io_directory}/pf_graph.pickle')
 
 print()
 

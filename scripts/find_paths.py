@@ -71,6 +71,13 @@ def find_paths(data_io_directory, graph_path):
             path_matrix[source][target] = path_length
     print('done')
 
+    num_paths = 0
+    for s in path_matrix.values:
+        for t in s.values:
+            if t != -1:
+                num_paths += 1
+    print(f'{indent}found {num_paths} paths')
+
     # write matrix to file
     print(f'{indent}writing path matrix to pickle file... ', end='', flush=True)
     with open(f'{data_io_directory}/path_matrix.pickle', 'wb') as output_file:

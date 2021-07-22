@@ -43,7 +43,7 @@ def get_nodes_and_edges(transaction):
 
     return (nodes, edges)
 
-def construct_graph(input_directory, graph_name):
+def construct_graph(data_io_directory, graph_name):
     program_start = perf_counter()
 
     indent = ''
@@ -55,7 +55,7 @@ def construct_graph(input_directory, graph_name):
     print(f'{indent}found {threads} available threads')
 
     print(f'{indent}locating input files... ', end='',flush=True)
-    csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+    csv_file_names = get_file_names(data_io_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
     print('done\n')
 
     graph = nx.Graph()
@@ -63,10 +63,10 @@ def construct_graph(input_directory, graph_name):
     for file in csv_file_names:
         file_start = perf_counter()
 
-        print(f'{indent}processing file {input_directory}/{file}:\n')
+        print(f'{indent}processing file {data_io_directory}/{file}:\n')
 
         print(f'{indent}    loading transactions... ', end='', flush=True)
-        transactions = load_transactions_from_csv(f'{input_directory}/{file}')
+        transactions = load_transactions_from_csv(f'{data_io_directory}/{file}')
         print('done')
 
         temp = profile(transactions)
@@ -94,7 +94,7 @@ def construct_graph(input_directory, graph_name):
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
         
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(graph, f'../data_out/{graph_name}')
+    nx.write_gpickle(graph, f'{data_io_directory}{graph_name}')
     print('done')
 
     print(f'{indent}added {len(graph.nodes):,} nodes and {len(graph.edges):,} edges to the address graph')
