@@ -58,7 +58,7 @@ def construct_graph(input_directory, graph_name):
     csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
     print('done\n')
 
-    address_graph = nx.DiGraph()
+    graph = nx.Graph()
     
     for file in csv_file_names:
         file_start = perf_counter()
@@ -84,20 +84,20 @@ def construct_graph(input_directory, graph_name):
         print(f'{indent}    adding edges to graph... ', end='', flush=True)
 
         for node_list in graph_nodes:
-            address_graph.add_nodes_from(node_list)
+            graph.add_nodes_from(node_list)
 
         for edge_list in graph_edges:
-            address_graph.add_edges_from(edge_list)
+            graph.add_edges_from(edge_list)
         print('done')
 
         file_end = perf_counter()
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
         
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(address_graph, f'../data_out/{graph_name}')
+    nx.write_gpickle(graph, f'../data_out/{graph_name}')
     print('done')
 
-    print(f'{indent}added {len(address_graph.nodes):,} nodes and {len(address_graph.edges):,} edges to the address graph')
+    print(f'{indent}added {len(graph.nodes):,} nodes and {len(graph.edges):,} edges to the address graph')
 
     program_end = perf_counter()
     print(f'{indent}execution finished in {program_end-program_start:.2f}s\n')

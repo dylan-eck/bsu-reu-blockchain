@@ -49,19 +49,19 @@ else:
     print(f'using default input directory {input_directory}')
 
 if args.output_directory:
-    output_directory = args.output_directory
-    print(f'using user-specified output directory {output_directory}')
+    data_io_directory = args.output_directory
+    print(f'using user-specified output directory {data_io_directory}')
 else:
-    output_directory = DEFUALT_OUTPUT_DIRECTORY
-    print(f'using default output directory {output_directory}')
+    data_io_directory = DEFUALT_OUTPUT_DIRECTORY
+    print(f'using default output directory {data_io_directory}')
 print()
 
 # create input and output directories if they do not already exist
 if not os.path.exists(input_directory):
     os.mkdir(input_directory)
 
-if not os.path.exists(output_directory):
-    os.mkdir(output_directory)
+if not os.path.exists(data_io_directory):
+    os.mkdir(data_io_directory)
 
 fill_char = '-'
 
@@ -70,7 +70,7 @@ print(f'{"":{fill_char}<79}')
 print('creating raw transaction csv files:')
 print(f'{"":{fill_char}<79}\n')
 
-create_transactions_csv(input_directory, output_directory)
+create_transactions_csv(input_directory, data_io_directory)
 
 print()
 
@@ -79,7 +79,7 @@ print(f'{"":{fill_char}<79}')
 print('classifying raw transactions and creating new csv files:')
 print(f'{"":{fill_char}<79}\n')
 
-classify_transactions(output_directory)
+classify_transactions(data_io_directory)
 
 print()
 
@@ -88,7 +88,7 @@ print(f'{"":{fill_char}<79}')
 print('simplifying transactions:')
 print(f'{"":{fill_char}<79}\n')
 
-simplify_transactions(output_directory)
+simplify_transactions(data_io_directory)
 
 print()
 
@@ -97,7 +97,7 @@ print(f'{"":{fill_char}<79}')
 print('untangling transactions:')
 print(f'{"":{fill_char}<79}\n')
 
-untangle_transactions(output_directory)
+untangle_transactions(data_io_directory)
 
 print()
 
@@ -106,7 +106,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for address selection:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(f'{output_directory}/raw_transactions_classified', 'selection_graph.pickle')
+construct_graph(f'{data_io_directory}/raw_transactions_classified', 'selection_graph.pickle')
 
 print()
 
@@ -115,7 +115,7 @@ print(f'{"":{fill_char}<79}')
 print('selecting addresses for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-select_addresses(output_directory, f'{output_directory}/selection_graph.pickle')
+select_addresses(data_io_directory, f'{data_io_directory}/selection_graph.pickle')
 
 print()
 
@@ -124,7 +124,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(f'{output_directory}/untangled_transactions', 'pf_graph.pickle')
+construct_graph(f'{data_io_directory}/untangled_transactions', 'pf_graph.pickle')
 
 print()
 
