@@ -116,7 +116,7 @@ print(f'{"":{fill_char}<79}')
 print('selecting addresses for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-select_addresses(data_io_directory, f'{data_io_directory}/selection_graph.pickle')
+select_addresses(data_io_directory, 'selection_graph.pickle')
 
 print()
 

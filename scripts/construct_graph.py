@@ -94,7 +94,7 @@ def construct_graph(data_io_directory, graph_name):
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
         
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(graph, f'{data_io_directory}{graph_name}')
+    nx.write_gpickle(graph, f'{data_io_directory}/{graph_name}')
     print('done')
 
     print(f'{indent}added {len(graph.nodes):,} nodes and {len(graph.edges):,} edges to the address graph')

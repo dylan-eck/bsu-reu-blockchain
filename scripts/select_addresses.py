@@ -2,7 +2,7 @@ from time import perf_counter
 import networkx as nx
 import random
 
-def select_addresses(data_io_directory, graph_path):
+def select_addresses(data_io_directory, graph_name):
     start = perf_counter()
     
     indent = ''
@@ -10,7 +10,7 @@ def select_addresses(data_io_directory, graph_path):
         indent = '    '
 
     print(f'{indent}loading graph... ', end='', flush=True)
-    address_graph = nx.read_gpickle(graph_path)
+    address_graph = nx.read_gpickle(f'{data_io_directory}/{graph_name}')
     print('done')
 
     print(f'{indent}selecting addresses... ', end='', flush=True)
