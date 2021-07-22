@@ -107,7 +107,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for address selection:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(f'{data_io_directory}/raw_transactions_classified', 'selection_graph.pickle')
+construct_graph(data_io_directory, 'selection_graph.pickle')
 
 print()
 
@@ -125,7 +125,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(f'{data_io_directory}/untangled_transactions', 'pf_graph.pickle')
+construct_graph(data_io_directory, 'pf_graph.pickle')
 
 print()
 

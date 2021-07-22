@@ -55,7 +55,8 @@ def construct_graph(data_io_directory, graph_name):
     print(f'{indent}found {threads} available threads')
 
     print(f'{indent}locating input files... ', end='',flush=True)
-    csv_file_names = get_file_names(data_io_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+    input_directory = f'{data_io_directory}/raw_transactions_classified'
+    csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
     print('done\n')
 
     graph = nx.Graph()
