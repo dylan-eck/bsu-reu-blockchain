@@ -291,7 +291,9 @@ def remove_small_outputs(transaction):
 	return transaction
 
 def simplify(transaction):
-	if transaction.type != 'intractable':
+	if (    len(transaction.inputs) != 1 
+        and len(transaction.outputs) != 1
+        and transaction.type != 'intractable'):
 		old_num_inputs = len(transaction.inputs)
 		old_num_outputs = len(transaction.outputs)
 
