@@ -8,6 +8,7 @@ from simplify import simplify_transactions
 from untangle import untangle_transactions
 from construct_graph import construct_graph
 from select_addresses import select_addresses
+from find_paths import find_paths
 
 main_start = perf_counter()
 
@@ -129,6 +130,14 @@ construct_graph(f'{data_io_directory}/untangled_transactions', 'pf_graph.pickle'
 print()
 
 # perform pathfinding 
+# construct transaction graph for untangled transactions
+print(f'{"":{fill_char}<79}')
+print('finding paths between addresses:')
+print(f'{"":{fill_char}<79}\n')
+
+find_paths(data_io_directory,f'{data_io_directory}/path_matrix.pickle')
+
+print()
 
 # display information about main.py execution
 main_end = perf_counter()
