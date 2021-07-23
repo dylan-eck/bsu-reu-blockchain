@@ -7,7 +7,7 @@ import multiprocessing as mp
 import pickle
 
 def get_path_length(addr_pair, graph):
-    print(f'using graph {hex(id(graph))}', end='\r', flush=True)
+    # print(f'using graph {hex(id(graph))}', end='\r', flush=True)
     path_length = 0
 
     source = addr_pair[0]
@@ -44,15 +44,12 @@ def find_paths(data_io_directory, graph_path):
 
     # find paths
     thread_count = mp.cpu_count()
-    pool = mp.Pool(processes=mp.cpu_count())
+    pool = mp.Pool(processes=thread_count)
 
-    manager = mp.Manager()
-    shared_graph = manager.Value(nx.Graph(), pf_graph)
-
-    # print(f'{indent}finding path lengths... ', end='', flush=True)
-    func = partial(get_path_length, graph=shared_graph)
+    print(f'{indent}finding path lengths... ', end='', flush=True)
+    func = partial(get_path_length, graph=pf_graph)
     results = pool.map(func, combinations(addresses, 2))
-    # print('done')
+    print('done')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
