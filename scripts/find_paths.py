@@ -5,28 +5,32 @@ import networkx as nx
 import multiprocessing as mp
 import pickle
 
-def get_path_length(addr_pair, graph):
+def get_path_length(addr_pair):
     path_length = 0
 
     source = addr_pair[0]
     target = addr_pair[1]
     
     try:
-        path = nx.bidirectional_shortest_path(graph, source, target)
+        path = nx.bidirectional_shortest_path(pf_graph, source, target)
         path_length = len(path)
         
     except (nx.NetworkXNoPath, nx.NodeNotFound):
         path_length = -1
+
+    print(f'{indent}finding paths... {source[:8]}...{source[-8:]} --> {target[:8]}...{target[-8:]} : {path_length}', end='\r', flush=True)
 
     return (addr_pair, path_length)
 
 def find_paths(data_io_directory, graph_path):
     pf_start = perf_counter()
 
+    global indent
     indent = '' if __name__ == '__main__' else '    '
     
     # load graph
     print(f'{indent}loading graph... ', end='', flush=True)
+    global pf_graph
     pf_graph = nx.read_gpickle(graph_path)
     print('done')
 
@@ -44,14 +48,9 @@ def find_paths(data_io_directory, graph_path):
     thread_count = mp.cpu_count()
     pool = mp.Pool(processes=thread_count)
 
-    print(f'{indent}generating address pairs... ', end='', flush=True)
-    pairs = combinations(addresses, 2)
-    print('done')
-
-    print(f'{indent}finding path lengths... ', end='', flush=True)
-    func = partial(get_path_length, graph=pf_graph)
-    results = pool.map(func, pairs)
-    print('done')
+    # print(f'{indent}finding paths... ', end='', flush=True)
+    results = pool.map(get_path_length, combinations(addresses, 2))
+    print(f'{"done":<79}')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
