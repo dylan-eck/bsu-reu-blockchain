@@ -1,3 +1,4 @@
+from multiprocessing import shared_memory
 from time import perf_counter
 from functools import partial
 from itertools import combinations
@@ -6,6 +7,7 @@ import multiprocessing as mp
 import pickle
 
 def get_path_length(addr_pair, graph):
+    print(f'using graph {hex(id(graph))}', end='\r', flush=True)
     path_length = 0
 
     source = addr_pair[0]
@@ -42,16 +44,15 @@ def find_paths(data_io_directory, graph_path):
 
     # find paths
     thread_count = mp.cpu_count()
-    pool = mp.Pool(processes=thread_count)
+    pool = mp.Pool(processes=mp.cpu_count())
 
-    print(f'{indent}generating address pairs... ', end='', flush=True)
-    pairs = combinations(addresses, 2)
-    print('done')
+    manager = mp.Manager()
+    shared_graph = manager.Value(nx.Graph(), pf_graph)
 
-    print(f'{indent}finding path lengths... ', end='', flush=True)
-    func = partial(get_path_length, graph=pf_graph)
-    results = pool.map(func, pairs)
-    print('done')
+    # print(f'{indent}finding path lengths... ', end='', flush=True)
+    func = partial(get_path_length, graph=shared_graph)
+    results = pool.map(func, combinations(addresses, 2))
+    # print('done')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
@@ -72,8 +73,8 @@ def find_paths(data_io_directory, graph_path):
     print('done')
 
     num_paths = 0
-    for s in path_matrix.values:
-        for t in s.values:
+    for s in path_matrix.values():
+        for t in s.values():
             if t != -1:
                 num_paths += 1
     print(f'{indent}found {num_paths} paths')
