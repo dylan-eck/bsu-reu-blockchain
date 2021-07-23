@@ -1,4 +1,3 @@
-from multiprocessing.managers import BaseManager
 from time import perf_counter
 from functools import partial
 from itertools import combinations
@@ -6,43 +5,32 @@ import networkx as nx
 import multiprocessing as mp
 import pickle
 
-class GraphWrapper():
-    def __init__(self, graph_path=''):
-        if not graph_path == '':
-            graph = nx.read_gpickle(graph_path)
-
-class graphManager(BaseManager):
-    pass
-
-graphManager.register('GraphWrapper', GraphWrapper)
-
-def get_path_length(addr_pair, graph):
-    print(f'using graph {hex(id(graph))}', end='\r', flush=True)
+def get_path_length(addr_pair):
     path_length = 0
 
     source = addr_pair[0]
     target = addr_pair[1]
     
     try:
-        path = nx.bidirectional_shortest_path(graph, source, target)
+        path = nx.bidirectional_shortest_path(pf_graph, source, target)
         path_length = len(path)
         
     except (nx.NetworkXNoPath, nx.NodeNotFound):
         path_length = -1
+
+    print(f'{indent}finding paths... {source[:8]}...{source[-8:]} --> {target[:8]}...{target[-8:]} : {path_length}', end='\r', flush=True)
 
     return (addr_pair, path_length)
 
 def find_paths(data_io_directory, graph_path):
     pf_start = perf_counter()
 
+    global indent
     indent = '' if __name__ == '__main__' else '    '
     
     # load graph
-    manager = graphManager()
-    manager.start()
-    g = manager.GraphWrapper(graph_path)
-
     print(f'{indent}loading graph... ', end='', flush=True)
+    global pf_graph
     pf_graph = nx.read_gpickle(graph_path)
     print('done')
 
@@ -60,10 +48,9 @@ def find_paths(data_io_directory, graph_path):
     thread_count = mp.cpu_count()
     pool = mp.Pool(processes=thread_count)
 
-    # print(f'{indent}finding path lengths... ', end='', flush=True)
-    func = partial(get_path_length, graph=g)
-    results = pool.map(func, combinations(addresses, 2))
-    # print('done')
+    # print(f'{indent}finding paths... ', end='', flush=True)
+    results = pool.map(get_path_length, combinations(addresses, 2))
+    print(f'{"done":<79}')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
