@@ -1,4 +1,3 @@
-from multiprocessing.managers import BaseManager
 from time import perf_counter
 from functools import partial
 from itertools import combinations
@@ -6,18 +5,7 @@ import networkx as nx
 import multiprocessing as mp
 import pickle
 
-class GraphWrapper():
-    def __init__(self, graph_path=''):
-        if not graph_path == '':
-            graph = nx.read_gpickle(graph_path)
-
-class graphManager(BaseManager):
-    pass
-
-graphManager.register('GraphWrapper', GraphWrapper)
-
 def get_path_length(addr_pair, graph):
-    print(f'using graph {hex(id(graph))}', end='\r', flush=True)
     path_length = 0
 
     source = addr_pair[0]
@@ -38,10 +26,6 @@ def find_paths(data_io_directory, graph_path):
     indent = '' if __name__ == '__main__' else '    '
     
     # load graph
-    manager = graphManager()
-    manager.start()
-    g = manager.GraphWrapper(graph_path)
-
     print(f'{indent}loading graph... ', end='', flush=True)
     pf_graph = nx.read_gpickle(graph_path)
     print('done')
@@ -60,10 +44,14 @@ def find_paths(data_io_directory, graph_path):
     thread_count = mp.cpu_count()
     pool = mp.Pool(processes=thread_count)
 
-    # print(f'{indent}finding path lengths... ', end='', flush=True)
-    func = partial(get_path_length, graph=g)
-    results = pool.map(func, combinations(addresses, 2))
-    # print('done')
+    print(f'{indent}generating address pairs... ', end='', flush=True)
+    pairs = combinations(addresses, 2)
+    print('done')
+
+    print(f'{indent}finding path lengths... ', end='', flush=True)
+    func = partial(get_path_length, graph=pf_graph)
+    results = pool.map(func, pairs)
+    print('done')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
