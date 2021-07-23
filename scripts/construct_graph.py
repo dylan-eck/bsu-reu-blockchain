@@ -67,7 +67,7 @@ def construct_graph(data_io_directory, graph_name):
         print(f'{indent}processing file {data_io_directory}/{file}:\n')
 
         print(f'{indent}    loading transactions... ', end='', flush=True)
-        transactions = load_transactions_from_csv(f'{data_io_directory}/{file}')
+        transactions = load_transactions_from_csv(f'{input_directory}/{file}')
         print('done')
 
         temp = profile(transactions)
