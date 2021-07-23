@@ -72,8 +72,8 @@ def find_paths(data_io_directory, graph_path):
     print('done')
 
     num_paths = 0
-    for s in path_matrix.values:
-        for t in s.values:
+    for s in path_matrix.values():
+        for t in s.values():
             if t != -1:
                 num_paths += 1
     print(f'{indent}found {num_paths} paths')
