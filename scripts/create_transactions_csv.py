@@ -84,10 +84,13 @@ def get_tx_data(block):
     return transaction_data
 
 def collect_n_transactions(block_data_directory, data_io_directory, num):
+    global indent
+    print(f'{indent}collecting {num:,} transactions... ', end='', flush=True)
+
     input_directory = block_data_directory
     day_directories = get_day_directories(input_directory)
 
-    output_directory = f'{data_io_directory}'
+    output_directory = f'{data_io_directory}/raw_transactions_unclassified'
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
@@ -101,6 +104,7 @@ def collect_n_transactions(block_data_directory, data_io_directory, num):
                 transactions += get_tx_data(block)
                 
                 if len(transactions) > num:
+                    print('done')
                     while len(transactions) > num:
                         transactions.pop()
 
@@ -110,14 +114,14 @@ def collect_n_transactions(block_data_directory, data_io_directory, num):
                         output_file.write(csv_headers)
                         for transaction in transactions:
                             output_file.write(transaction.to_csv_string())
+                    
                     return
+    print('done')
 
 def collect_all_transactions(block_data_directory, data_io_directory):
+    global indent
+    
     program_start = perf_counter()
-
-    indent = ''
-    if __name__ != '__main__':
-        indent = '    '
 
     input_directory = block_data_directory
     day_directories = get_day_directories(input_directory)
@@ -137,7 +141,7 @@ def collect_all_transactions(block_data_directory, data_io_directory):
 
         transactions = []
         for file_name in block_files:
-            print(f'{indent}    processing blocks... {block["hash"]}', end='\r', flush=True)
+            print(f'{indent}    processing blocks... {file_name[:-4]}', end='\r', flush=True)
             with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
@@ -159,6 +163,10 @@ def collect_all_transactions(block_data_directory, data_io_directory):
     program_end = perf_counter()
     execution_time_s = program_end - program_start
     print(f'{indent}execution finished in {execution_time_s/60:.2f} minutes')
+
+indent = ''
+if __name__ != '__main__':
+    indent = '    '
 
 if __name__ == '__main__':
     collect_all_transactions('../block_data', '../data_out')

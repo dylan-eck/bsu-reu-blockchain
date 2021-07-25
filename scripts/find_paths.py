@@ -12,6 +12,7 @@ def get_path_length(addr_pair):
     target = addr_pair[1]
     
     try:
+        global pf_graph
         path = nx.bidirectional_shortest_path(pf_graph, source, target)
         path_length = len(path)
         
