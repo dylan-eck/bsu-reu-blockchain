@@ -31,7 +31,8 @@ parser.add_argument('-o', '-output',
 
 parser.add_argument('-s', '--scale-test',
                     dest='sc_test',
-                    type=bool
+                    type=bool,
+                    help = 'temp'
                     )
 
 # parser.add_argument('-b', '--begin',
