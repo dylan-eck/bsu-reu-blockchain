@@ -161,10 +161,4 @@ def collect_all_transactions(block_data_directory, data_io_directory):
     print(f'{indent}execution finished in {execution_time_s/60:.2f} minutes')
 
 if __name__ == '__main__':
-    # create_transactions_csv('../block_data', '../data_out')
-    test_nums = [10, 100, 1000, 10000, 100000, 50000, 1000000, 5000000, 10000000]
-
-    for num in test_nums:
-        print(f'collecting {num:,} transactions... ', end='', flush=True)
-        collect_n_transactions('../block_data', '../data_out', num)
-        print('done')
+    collect_all_transactions('../block_data', '../data_out')

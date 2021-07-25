@@ -2,7 +2,7 @@ from time import perf_counter
 import argparse
 import os
 
-from create_transactions_csv import create_transactions_csv
+from create_transactions_csv import collect_all_transactions
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
@@ -71,7 +71,7 @@ print(f'{"":{fill_char}<79}')
 print('creating raw transaction csv files:')
 print(f'{"":{fill_char}<79}\n')
 
-create_transactions_csv(input_directory, data_io_directory)
+collect_all_transactions(input_directory, data_io_directory)
 
 print()
 
