@@ -83,13 +83,41 @@ def get_tx_data(block):
 
     return transaction_data
 
-def create_transactions_csv(block_data_directory, data_io_directory):
+def collect_n_transactions(block_data_directory, data_io_directory, num):
+    input_directory = block_data_directory
+    day_directories = get_day_directories(input_directory)
+
+    output_directory = f'{data_io_directory}'
+    if not os.path.exists(output_directory):
+        os.mkdir(output_directory)
+
+    transactions = []
+    for directory_name in day_directories:
+        block_files = get_block_files(f'{input_directory}/{directory_name}')
+
+        for file_name in block_files:
+            with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
+                block = json.load(input_file)
+                transactions += get_tx_data(block)
+                
+                if len(transactions) > num:
+                    while len(transactions) > num:
+                        transactions.pop()
+
+                    out_file_name =f'{output_directory}/{num}_txs.csv'
+                    with open(out_file_name, 'w') as output_file:
+                        csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
+                        output_file.write(csv_headers)
+                        for transaction in transactions:
+                            output_file.write(transaction.to_csv_string())
+                    return
+
+def collect_all_transactions(block_data_directory, data_io_directory):
     program_start = perf_counter()
 
     indent = ''
     if __name__ != '__main__':
         indent = '    '
-
 
     input_directory = block_data_directory
     day_directories = get_day_directories(input_directory)
@@ -109,11 +137,11 @@ def create_transactions_csv(block_data_directory, data_io_directory):
 
         transactions = []
         for file_name in block_files:
+            print(f'{indent}    processing blocks... {block["hash"]}', end='\r', flush=True)
             with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
 
-                print(f'{indent}    processing blocks... {block["hash"]}', end='\r', flush=True)
         print(f'{f"{indent}    processing blocks... done":<100}')
 
         print(f'{indent}    writing new csv file... ', end='', flush=True)
@@ -133,4 +161,10 @@ def create_transactions_csv(block_data_directory, data_io_directory):
     print(f'{indent}execution finished in {execution_time_s/60:.2f} minutes')
 
 if __name__ == '__main__':
-    create_transactions_csv('../block_data', '../data_out')
+    # create_transactions_csv('../block_data', '../data_out')
+    test_nums = [10, 100, 1000, 10000, 100000, 50000, 1000000, 5000000, 10000000]
+
+    for num in test_nums:
+        print(f'collecting {num:,} transactions... ', end='', flush=True)
+        collect_n_transactions('../block_data', '../data_out', num)
+        print('done')
