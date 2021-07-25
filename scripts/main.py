@@ -31,8 +31,7 @@ parser.add_argument('-o', '-output',
 
 parser.add_argument('-s', '--scale-test',
                     dest='sc_test',
-                    type=bool,
-                    help = 'temp'
+                    action='store_true'
                     )
 
 # parser.add_argument('-b', '--begin',
@@ -48,7 +47,7 @@ parser.add_argument('-s', '--scale-test',
 
 args = parser.parse_args()
 
-sc_test = parser.sc_test
+sc_test = args.sc_test
 
 DEFAULT_INPUT_DIRECTORY = '../block_data'
 DEFUALT_OUTPUT_DIRECTORY = '../data_out'
