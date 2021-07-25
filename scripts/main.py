@@ -11,7 +11,7 @@ from select_addresses import select_addresses
 from find_paths import find_paths
 
 def create_scalability_test_input(block_data_directory, data_io_directory):
-    n = [100, 1000, 10000, 50000, 100000, 1000000, 5000000, 10000000]
+    n = [10000, 50000, 100000, 1000000, 5000000, 10000000]
     for num in n:
         collect_n_transactions(block_data_directory, data_io_directory, num)
 
