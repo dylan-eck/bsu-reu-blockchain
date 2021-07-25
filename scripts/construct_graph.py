@@ -43,7 +43,7 @@ def get_nodes_and_edges(transaction):
 
     return (nodes, edges)
 
-def construct_graph(data_io_directory, graph_name):
+def construct_graph(data_io_directory, file_pattern, graph_name):
     program_start = perf_counter()
 
     indent = ''
@@ -56,7 +56,7 @@ def construct_graph(data_io_directory, graph_name):
 
     print(f'{indent}locating input files... ', end='',flush=True)
     input_directory = f'{data_io_directory}/raw_transactions_classified'
-    csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+    csv_file_names = get_file_names(input_directory, file_pattern)
     print('done\n')
 
     graph = nx.Graph()

@@ -11,7 +11,7 @@ import os
 
 from functions import get_file_names, load_transactions_from_csv, classify
 
-def classify_transactions(data_io_directory):
+def classify_transactions(data_io_directory, file_pattern):
     program_start = perf_counter()
 
     indent = ''
@@ -30,7 +30,7 @@ def classify_transactions(data_io_directory):
 
     # --- locate csv files ---
     print(f'{indent}locating csv files... ', end='', flush=True)
-    csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+    csv_file_names = get_file_names(input_directory, file_pattern)
     print('done\n')
 
     # --- load transactions ---

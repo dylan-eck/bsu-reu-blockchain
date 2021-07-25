@@ -4,7 +4,7 @@ import os
 
 from functions import classify, get_file_names, load_transactions_from_csv, simplify, profile
 
-def simplify_transactions(data_io_directory):
+def simplify_transactions(data_io_directory, file_pattern):
 
     indent = ''
     if __name__ != '__main__':
@@ -20,7 +20,7 @@ def simplify_transactions(data_io_directory):
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
-    csv_file_names = get_file_names(input_directory, "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$")
+    csv_file_names = get_file_names(input_directory, file_pattern)
 
     for file_name in csv_file_names:
         simp_start = perf_counter()

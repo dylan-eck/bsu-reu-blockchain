@@ -83,8 +83,10 @@ print(f'{"":{fill_char}<79}\n')
 
 if sc_test:
     create_scalability_test_input(input_directory, data_io_directory)
+    file_pattern = "*_txs.csv$"
 else:
     collect_all_transactions(input_directory, data_io_directory)
+    file_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
 
 print()
 
@@ -95,7 +97,7 @@ print(f'{"":{fill_char}<79}')
 print('classifying raw transactions and creating new csv files:')
 print(f'{"":{fill_char}<79}\n')
 
-classify_transactions(data_io_directory)
+classify_transactions(data_io_directory, file_pattern)
 
 print()
 
@@ -104,7 +106,7 @@ print(f'{"":{fill_char}<79}')
 print('simplifying transactions:')
 print(f'{"":{fill_char}<79}\n')
 
-simplify_transactions(data_io_directory)
+simplify_transactions(data_io_directory, file_pattern)
 
 print()
 
@@ -113,7 +115,7 @@ print(f'{"":{fill_char}<79}')
 print('untangling transactions:')
 print(f'{"":{fill_char}<79}\n')
 
-untangle_transactions(data_io_directory)
+untangle_transactions(data_io_directory, file_pattern)
 
 print()
 
@@ -122,7 +124,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for address selection:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(data_io_directory, 'selection_graph.pickle')
+construct_graph(data_io_directory, file_pattern, 'selection_graph.pickle')
 
 print()
 
@@ -131,7 +133,7 @@ print(f'{"":{fill_char}<79}')
 print('selecting addresses for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-select_addresses(data_io_directory, 'selection_graph.pickle')
+select_addresses(data_io_directory,'selection_graph.pickle')
 
 print()
 
@@ -140,7 +142,7 @@ print(f'{"":{fill_char}<79}')
 print('constructing address graph for pathfinding:')
 print(f'{"":{fill_char}<79}\n')
 
-construct_graph(data_io_directory, 'pf_graph.pickle')
+construct_graph(data_io_directory, file_pattern,'pf_graph.pickle')
 
 print()
 
@@ -150,7 +152,7 @@ print(f'{"":{fill_char}<79}')
 print('finding paths between addresses:')
 print(f'{"":{fill_char}<79}\n')
 
-find_paths(data_io_directory,f'{data_io_directory}/pf_graph.pickle')
+find_paths(data_io_directory, f'{data_io_directory}/pf_graph.pickle')
 
 print()
 
