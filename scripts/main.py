@@ -2,7 +2,7 @@ from time import perf_counter
 import argparse
 import os
 
-from create_transactions_csv import collect_all_transactions
+from create_transactions_csv import collect_all_transactions, collect_n_transactions
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
@@ -10,7 +10,10 @@ from construct_graph import construct_graph
 from select_addresses import select_addresses
 from find_paths import find_paths
 
-main_start = perf_counter()
+def create_scalability_test_input(block_data_directory, data_io_directory):
+    n = [100, 1000, 10000, 50000, 100000, 1000000, 5000000, 10000000]
+    for num in n:
+        collect_n_transactions(block_data_directory, data_io_directory, num)
 
 # command line interface
 parser = argparse.ArgumentParser()
@@ -26,18 +29,25 @@ parser.add_argument('-o', '-output',
                     help='the directoy where output files are written'
                     )
 
-parser.add_argument('-b', '--begin',
-                    dest='begin_day',
-                    type=str,
-                    help='the first day to collect blocks from'
+parser.add_argument('-s', '--scale-test',
+                    dest='sc_test',
+                    type=bool
                     )
 
-parser.add_argument('-e', '--end',
-                    dest='end_day',
-                    type=str,
-                    help='the last day to collect transactions from')
+# parser.add_argument('-b', '--begin',
+#                     dest='begin_day',
+#                     type=str,
+#                     help='the first day to collect blocks from'
+#                     )
+
+# parser.add_argument('-e', '--end',
+#                     dest='end_day',
+#                     type=str,
+#                     help='the last day to collect transactions from')
 
 args = parser.parse_args()
+
+sc_test = parser.sc_test
 
 DEFAULT_INPUT_DIRECTORY = '../block_data'
 DEFUALT_OUTPUT_DIRECTORY = '../data_out'
@@ -71,9 +81,14 @@ print(f'{"":{fill_char}<79}')
 print('creating raw transaction csv files:')
 print(f'{"":{fill_char}<79}\n')
 
-collect_all_transactions(input_directory, data_io_directory)
+if sc_test:
+    create_scalability_test_input(input_directory, data_io_directory)
+else:
+    collect_all_transactions(input_directory, data_io_directory)
 
 print()
+
+main_start = perf_counter()
 
 # perform initial classification of raw transactions
 print(f'{"":{fill_char}<79}')
