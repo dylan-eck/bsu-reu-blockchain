@@ -124,7 +124,6 @@ def collect_transactions_by_chunk(input_directory, output_directory, chunk_size,
                     print(f'    collecting chunk {chunk_num}... ', end='', flush=True)
 
 def collect_transactions_by_day(input_directory, output_directory):
-    input_directory = input_directory
     day_directories = get_day_directories(input_directory)
 
     if not os.path.exists(f'{output_directory}/raw_transactions_unclassified'):
@@ -190,12 +189,6 @@ if __name__ == '__main__':
                         help='ouput csv files will be broken up into equal size chunks'
                         )
     
-    parser.add_argument('-s', '-size',
-                        dest='chunk_size',
-                        type=int,
-                        help='chunk size'
-                        )
-
     args = parser.parse_args()
 
     print(f'{"":{FILL_CHAR_DASH}<79}')
