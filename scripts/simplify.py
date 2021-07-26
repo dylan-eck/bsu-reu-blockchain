@@ -58,7 +58,7 @@ def simplify_transactions(data_io_directory, file_pattern):
         print('done')
 
         simp_end = perf_counter()
-        print(f'{indent}    finished in {simp_end - simp_start:.2f}s\n')
+        print(f'{indent}    finished in {simp_end - simp_start:.2f}s')
 
 if __name__ == '__main__':
     simplify_transactions('../data_out')
