@@ -25,7 +25,14 @@ if __name__ == '__main__':
                         help='naming convention fro files'
                         )
 
+    parser.add_argument('-c', '-cluster',
+                        dest='use_clusters',
+                        action='store_true',
+                        help='tells the graph constructor that clusters are being used')
+
     args = parser.parse_args()
+
+    use_clusters = args.use_clusters
 
     DEFUALT_IO_DIRECTORY = '../data_out'
 
@@ -79,12 +86,12 @@ if __name__ == '__main__':
 
     print()
 
-    # construct transaction graph for classified raw transactions
+    # construct transaction graph for transaction selection
     print(f'{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(io_directory, file_naming_convention, 'selection_graph.pickle')
+    construct_graph(f'{io_directory}/raw_transactions_unclassified', io_directory, file_naming_convention, 'selection_graph.pickle')
 
     print()
 
@@ -97,17 +104,16 @@ if __name__ == '__main__':
 
     print()
 
-    # construct transaction graph for untangled transactions
+    # construct transaction graph for path finding
     print(f'{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(io_directory, file_naming_convention,'pf_graph.pickle')
+    construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention,'pf_graph.pickle')
 
     print()
 
     # perform pathfinding 
-    # construct transaction graph for untangled transactions
     print(f'{"":{FILL_CHAR_DASH}<79}')
     print('finding paths between addresses:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')

@@ -82,7 +82,7 @@ def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None):
 
     return (nodes, edges)
 
-def construct_graph(data_io_directory, file_pattern, graph_name, with_clusters=False, cluster_file_path=''):
+def construct_graph(input_directory, output_directory, file_pattern, graph_name, with_clusters=False, cluster_file_path=''):
     program_start = perf_counter()
 
     indent = ''
@@ -94,7 +94,6 @@ def construct_graph(data_io_directory, file_pattern, graph_name, with_clusters=F
     print(f'{indent}found {threads} available threads')
 
     print(f'{indent}locating input files... ', end='',flush=True)
-    input_directory = f'{data_io_directory}/raw_transactions_classified'
     csv_file_names = get_file_names(input_directory, file_pattern)
 
     global cluster_dict
@@ -143,7 +142,7 @@ def construct_graph(data_io_directory, file_pattern, graph_name, with_clusters=F
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
         
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
-    nx.write_gpickle(graph, f'{data_io_directory}/{graph_name}')
+    nx.write_gpickle(graph, f'{output_directory}/{graph_name}')
     print('done')
 
     print(f'{indent}added {len(graph.nodes):,} nodes and {len(graph.edges):,} edges to the address graph')
