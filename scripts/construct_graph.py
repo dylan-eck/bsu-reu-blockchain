@@ -6,6 +6,20 @@ import networkx as nx
 
 from functions import get_file_names, load_transactions_from_csv, profile
 
+def load_clusters(cluster_file_path):
+    cluster_dict = {}
+    with open(cluster_file_path, 'r') as input_file:
+        input_file.readline()
+        for line in input_file:
+            fields = line.split(',')
+
+            address = fields[0]
+            cluster = fields[1].strip()
+
+            cluster_dict[address] = cluster
+        
+    return cluster_dict
+
 def link_cluster_addresses(cluster_dict, transaction):
     edges = []
     
@@ -109,7 +123,7 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
     for file in csv_file_names:
         file_start = perf_counter()
 
-        print(f'{indent}processing file raw_transactions_classified/{file}:\n')
+        print(f'{indent}processing file {input_directory}/{file}:\n')
 
         print(f'{indent}    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}/{file}')
@@ -149,21 +163,3 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
 
     program_end = perf_counter()
     print(f'{indent}execution finished in {program_end-program_start:.2f}s\n')
-
-def load_clusters(cluster_file_path):
-    cluster_dict = {}
-    with open(cluster_file_path, 'r') as input_file:
-        input_file.readline()
-        for line in input_file:
-            fields = line.split(',')
-
-            address = fields[0]
-            cluster = fields[1].strip()
-
-            cluster_dict[address] = cluster
-        
-    return cluster_dict
-
-if __name__ == '__main__':
-    input_directory = '../2021-06-03_2021-06-09'
-    construct_graph(input_directory, "^[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$", 'address_graph.pickle', with_clusters=True, cluster_file_path=f'{input_directory}/clusters_2021-06-03-2021-06-09.csv')
