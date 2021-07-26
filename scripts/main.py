@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    clusters = args.clusters
+    clusters = args.clusters[0]
 
     DEFUALT_IO_DIRECTORY = '../data_out'
 
