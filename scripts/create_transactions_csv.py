@@ -85,7 +85,6 @@ def get_tx_data(block):
     return transaction_data
 
 def collect_transactions_by_chunk(input_directory, output_directory, chunk_size, num_chunks=None):
-    input_directory = input_directory
     day_directories = get_day_directories(input_directory)
 
     output_directory = f'{output_directory}/raw_transactions_unclassified'
@@ -140,7 +139,7 @@ def collect_transactions_by_day(input_directory, output_directory):
 
         transactions = []
         for file_name in block_files:
-            print(f'        processing blocks... {file_name[:8]}...{file_name[-13:-5]}', end='\r', flush=True)
+            print(f'        processing blocks... {file_name[:7]}..{file_name[-12:-5]}', end='\r', flush=True)
             with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
