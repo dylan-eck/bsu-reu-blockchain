@@ -127,9 +127,8 @@ def collect_transactions_by_day(input_directory, output_directory):
     input_directory = input_directory
     day_directories = get_day_directories(input_directory)
 
-    output_directory = f'{output_directory}/raw_transactions_unclassified'
-    if not os.path.exists(output_directory):
-        os.mkdir(output_directory)
+    if not os.path.exists(f'{output_directory}/raw_transactions_unclassified'):
+        os.mkdir(f'{output_directory}/raw_transactions_unclassified')
 
     for directory_name in day_directories:
         day_start = perf_counter()
@@ -150,7 +149,7 @@ def collect_transactions_by_day(input_directory, output_directory):
         print(f'{f"        processing blocks... done":<79}')
 
         print(f'        writing new csv file... ', end='', flush=True)
-        out_file_name =f'{output_directory}/{directory_name}.csv'
+        out_file_name =f'{output_directory}/raw_transactions_unclassified/{directory_name}.csv'
         with open(out_file_name, 'w') as output_file:
             csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
             output_file.write(csv_headers)
