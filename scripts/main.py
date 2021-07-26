@@ -2,7 +2,6 @@ from time import perf_counter
 import argparse
 import os
 
-from create_transactions_csv import collect_transactions_by_day, collect_transactions_by_chunk
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
@@ -13,6 +12,7 @@ from find_paths import find_paths
 if __name__ == '__main__':
     # command line interface
     parser = argparse.ArgumentParser()
+
     parser.add_argument('-d', '--directory',
                         dest='io_directory',
                         type=str,
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fname-con',
                         dest='fname_con',
                         type=str,
-                        help='naming convention fro files'
+                        help='naming convention for target files'
                         )
 
     parser.add_argument('-c', '-cluster',
@@ -47,10 +47,7 @@ if __name__ == '__main__':
     # "^tramsactions_[0-9]*.csv$"
     file_naming_convention = args.fname_con
 
-    # create input and output directories, if they do not already exist
-    if not os.path.exists(io_directory):
-        os.mkdir(io_directory)
-
+    # create io directory, if it does not already exist
     if not os.path.exists(io_directory):
         os.mkdir(io_directory)
 
@@ -91,7 +88,7 @@ if __name__ == '__main__':
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/raw_transactions_unclassified', io_directory, file_naming_convention, 'selection_graph.pickle')
+    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
 
     print()
 
@@ -100,7 +97,7 @@ if __name__ == '__main__':
     print('selecting addresses for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    select_addresses(io_directory,'selection_graph.pickle')
+    select_addresses(io_directory, 'selection_graph.pickle')
 
     print()
 
@@ -109,7 +106,7 @@ if __name__ == '__main__':
     print('constructing address graph for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention,'pf_graph.pickle')
+    construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle')
 
     print()
 
