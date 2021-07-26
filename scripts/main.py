@@ -26,13 +26,14 @@ if __name__ == '__main__':
                         )
 
     parser.add_argument('-c', '-cluster',
-                        dest='use_clusters',
-                        action='store_true',
+                        dest='clusters',
+                        type=str,
+                        nargs=1,
                         help='tells the graph constructor that clusters are being used')
 
     args = parser.parse_args()
 
-    use_clusters = args.use_clusters
+    clusters = args.clusters
 
     DEFUALT_IO_DIRECTORY = '../data_out'
 
@@ -83,12 +84,16 @@ if __name__ == '__main__':
 
     print()
 
-    # construct transaction graph for transaction selection
+    # construct address graph for transaction selection
     print(f'{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
+    if clusters:
+        construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle', with_clusters=True, cluster_file_path=clusters)
+
+    else:
+        construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
 
     print()
 
@@ -101,12 +106,16 @@ if __name__ == '__main__':
 
     print()
 
-    # construct transaction graph for path finding
+    # construct address graph for path finding
     print(f'{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle')
+    if clusters:
+        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters)
+
+    else:
+        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle')
 
     print()
 
