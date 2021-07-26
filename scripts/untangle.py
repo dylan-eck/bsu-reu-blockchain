@@ -28,7 +28,7 @@ def untangle_transactions(data_io_directory, file_pattern):
     for file in csv_file_names:
         untangle_start = perf_counter()
 
-        print(f'{indent}processing file {input_directory}/{file}:\n')
+        print(f'{indent}processing file simplified_transactions/{file}:\n')
         print(f'{indent}    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}/{file}')
         print('done')
@@ -54,7 +54,7 @@ def untangle_transactions(data_io_directory, file_pattern):
             print(f'{indent}        {key:>14}: {val:,}')
         print()
         
-        print(f'{indent}    writing new csv file {output_directory}/{file}... ', end='', flush=True)
+        print(f'{indent}    writing new csv file... ', end='', flush=True)
         with open(f'{output_directory}/{file}', 'w') as output_file:
             output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
             for transaction in untangled_txs:

@@ -64,7 +64,7 @@ def construct_graph(data_io_directory, file_pattern, graph_name):
     for file in csv_file_names:
         file_start = perf_counter()
 
-        print(f'{indent}processing file {data_io_directory}/{file}:\n')
+        print(f'{indent}processing file raw_transactions_classified/{file}:\n')
 
         print(f'{indent}    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}/{file}')

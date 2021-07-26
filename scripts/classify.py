@@ -37,7 +37,7 @@ def classify_transactions(data_io_directory, file_pattern):
     for file_name in csv_file_names:
         file_start = perf_counter()
 
-        print(f'{indent}processing file {input_directory}/{file_name}:\n')
+        print(f'{indent}processing file raw_transactions_unclassified/{file_name}:\n')
         print(f'{indent}    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}/{file_name}')    
         print('done')
