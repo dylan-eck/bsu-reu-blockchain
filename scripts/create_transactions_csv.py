@@ -83,9 +83,8 @@ def get_tx_data(block):
 
     return transaction_data
 
-def collect_n_transactions(block_data_directory, data_io_directory, num):
+def collect_transactions_by_chunk(block_data_directory, data_io_directory, chunk_size, num_chunks=None):
     global indent
-    print(f'{indent}collecting {num:,} transactions... ', end='', flush=True)
 
     input_directory = block_data_directory
     day_directories = get_day_directories(input_directory)
@@ -95,6 +94,7 @@ def collect_n_transactions(block_data_directory, data_io_directory, num):
         os.mkdir(output_directory)
 
     transactions = []
+    chunk_num = 1
     for directory_name in day_directories:
         block_files = get_block_files(f'{input_directory}/{directory_name}')
 
@@ -103,22 +103,26 @@ def collect_n_transactions(block_data_directory, data_io_directory, num):
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
                 
-                if len(transactions) > num:
-                    print('done')
-                    while len(transactions) > num:
-                        transactions.pop()
+                if len(transactions) > chunk_size:
+                    
+                    extra_transactions = []
+                    while len(transactions) > chunk_size:
+                        extra_transactions.append(transactions.pop())
 
-                    out_file_name =f'{output_directory}/{num}_txs.csv'
+                    out_file_name =f'{output_directory}/transactions_{chunk_num}.csv'
                     with open(out_file_name, 'w') as output_file:
                         csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
                         output_file.write(csv_headers)
                         for transaction in transactions:
                             output_file.write(transaction.to_csv_string())
-                    
-                    return
-    print('done')
 
-def collect_all_transactions(block_data_directory, data_io_directory):
+                    if num_chunks and chunk_num == num_chunks:
+                        return
+
+                    transactions = extra_transactions
+                    chunk_num += 1
+
+def collect_transactions_by_day(block_data_directory, data_io_directory):
     global indent
     
     program_start = perf_counter()
@@ -169,4 +173,6 @@ if __name__ != '__main__':
     indent = '    '
 
 if __name__ == '__main__':
-    collect_all_transactions('../block_data', '../data_out')
+    # collect_transactions_by_day('../block_data', '../data_out')
+
+    collect_transactions_by_chunk('../block_data', '../data_out', 10000, 2)

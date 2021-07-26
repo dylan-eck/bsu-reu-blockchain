@@ -2,18 +2,13 @@ from time import perf_counter
 import argparse
 import os
 
-from create_transactions_csv import collect_all_transactions, collect_n_transactions
+from create_transactions_csv import collect_transactions_by_day, collect_transactions_by_chunk
 from classify import classify_transactions
 from simplify import simplify_transactions
 from untangle import untangle_transactions
 from construct_graph import construct_graph
 from select_addresses import select_addresses
 from find_paths import find_paths
-
-def create_scalability_test_input(block_data_directory, data_io_directory):
-    n = [10000, 50000, 100000, 1000000, 5000000, 10000000]
-    for num in n:
-        collect_n_transactions(block_data_directory, data_io_directory, num)
 
 if __name__ == '__main__':
     # command line interface
@@ -36,8 +31,6 @@ if __name__ == '__main__':
                         )
 
     args = parser.parse_args()
-
-    sc_test = args.sc_test
 
     DEFAULT_INPUT_DIRECTORY = '../block_data'
     DEFUALT_OUTPUT_DIRECTORY = '../data_out'
@@ -65,19 +58,15 @@ if __name__ == '__main__':
         os.mkdir(data_io_directory)
 
     fill_char = '-'
+    file_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
 
     # create raw transaction csv files
     print(f'{"":{fill_char}<79}')
     print('creating raw transaction csv files:')
     print(f'{"":{fill_char}<79}\n')
 
-    if sc_test:
-        create_scalability_test_input(input_directory, data_io_directory)
-        file_pattern = "[0-9]*_txs.csv$"
-    else:
-        collect_all_transactions(input_directory, data_io_directory)
-        file_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
-
+    collect_transactions_by_day(input_directory, data_io_directory)
+    
     print()
 
     main_start = perf_counter()
