@@ -72,7 +72,7 @@ def construct_graph(data_io_directory, file_pattern, graph_name):
 
         temp = profile(transactions)
         for (key, val) in temp.items():
-            print(f'        {key}: {val:,}')
+            print(f'        {key>14}: {val:,}')
         print()
 
         print(f'{indent}    collecting graph edges... ', end='', flush=True)

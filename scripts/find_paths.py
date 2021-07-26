@@ -19,7 +19,7 @@ def get_path_length(addr_pair):
     except (nx.NetworkXNoPath, nx.NodeNotFound):
         path_length = -1
 
-    print(f'{indent}finding paths... {source[:8]}...{source[-8:]} --> {target[:8]}...{target[-8:]} : {path_length}', end='\r', flush=True)
+    print(f'{indent}finding paths... {source[:7]}..{source[-7:]} --> {target[:7]}..{target[-7:]} : {path_length}', end='\r', flush=True)
 
     return (addr_pair, path_length)
 
@@ -51,7 +51,7 @@ def find_paths(data_io_directory, graph_path):
 
     # print(f'{indent}finding paths... ', end='', flush=True)
     results = pool.map(get_path_length, combinations(addresses, 2))
-    print(f'{"done":<79}')
+    print(f'{f"{indent}finding paths... done":<79}')
 
     # create matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
@@ -76,7 +76,7 @@ def find_paths(data_io_directory, graph_path):
         for t in s.values():
             if t != -1:
                 num_paths += 1
-    print(f'{indent}found {num_paths} paths')
+    print(f'{indent}found {num_paths:,} paths')
 
     # write matrix to file
     print(f'{indent}writing path matrix to pickle file... ', end='', flush=True)
