@@ -89,11 +89,7 @@ if __name__ == '__main__':
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    if clusters:
-        construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle', with_clusters=True, cluster_file_path=clusters)
-
-    else:
-        construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
+    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
 
     print()
 
