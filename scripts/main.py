@@ -58,7 +58,6 @@ if __name__ == '__main__':
         os.mkdir(data_io_directory)
 
     fill_char = '-'
-    file_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
 
     # create raw transaction csv files
     print(f'{"":{fill_char}<79}')
@@ -70,6 +69,9 @@ if __name__ == '__main__':
     print()
 
     main_start = perf_counter()
+
+    fill_char = '-'
+    file_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
 
     # perform initial classification of raw transactions
     print(f'{"":{fill_char}<79}')
