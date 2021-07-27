@@ -35,6 +35,9 @@ if __name__ == '__main__':
 
     if args.clusters:
         clusters = args.clusters[0]
+    
+    else:
+        clusters = None
 
     DEFUALT_IO_DIRECTORY = '../data_out'
 
