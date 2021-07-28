@@ -15,7 +15,7 @@ def get_immediate_subdirectories(directory_path):
 
     return immediate_subdirectories
 
-def get_file_names(direcotry, pattern):
+def get_file_names_regex(direcotry, pattern):
     file_names = []
     for (root, dirs, files) in os.walk(direcotry):
         for file in files:
@@ -101,7 +101,7 @@ def get_codewords(n, k):
                     codeword[startIndex] += 1
                     break
 
-def get_partitions(list,max_size):
+def get_partitions(list, max_size):
     n = len(list)
     codewords = get_codewords(n,max_size)
 
@@ -136,27 +136,31 @@ def group_partitions_by_size(partitions):
             partition_dict[size] = [partition]
     return partition_dict
 
-def is_connectable(input_subset,output_subset,transaction_fee):
+# connectability criteria from "Shared Send Untangling in Bitcoin"
+def is_connectable(input_subset, output_subset, transaction_fee):
     input_sum = sum([item[1] for item in input_subset])
     output_sum = sum([item[1] for item in output_subset])
 
     a = output_sum + transaction_fee
     return(a >= input_sum and input_sum >= output_sum)
 
-def get_acceptable_connections(partition_size,input_partition,output_partition,transaction_fee):
+def get_acceptable_connections(partition_size, input_partition, output_partition, transaction_fee):
     acceptable_connections = []
 
     # check the input partition against all possible orderings of the output partition
-    output_orders = list(permutations(output_partition,len(output_partition)))
+    output_orders = list(permutations(output_partition, len(output_partition)))
     for output_ordering in output_orders:
         acceptable = True
+
         for i in range(partition_size):
-            pair_connectable = is_connectable(input_partition[i],output_ordering[i],transaction_fee)
+            pair_connectable = is_connectable(input_partition[i], output_ordering[i], transaction_fee)
+
             if not pair_connectable:
                 acceptable = False
                 break
+
         if acceptable:
-            partition = (input_partition,output_ordering)
+            partition = (input_partition, output_ordering)
             acceptable_connections.append(partition)
 
     return acceptable_connections
@@ -165,19 +169,19 @@ def get_acceptable_partitions(transaction):
     num_inputs = len(transaction.inputs)
     num_outputs = len(transaction.outputs)
 
-    max_partition_size = min(num_inputs,num_outputs)
+    max_partition_size = min(num_inputs, num_outputs)
 
-    input_partitions = get_partitions(transaction.inputs,max_partition_size)
-    output_partitions = get_partitions(transaction.outputs,max_partition_size)
+    input_partitions = get_partitions(transaction.inputs, max_partition_size)
+    output_partitions = get_partitions(transaction.outputs, max_partition_size)
 
     input_partitions = group_partitions_by_size(input_partitions)
     output_partitions = group_partitions_by_size(output_partitions)
 
     acceptable_partitions = []
-    for i in range(2,max_partition_size+1):
+    for i in range(2, max_partition_size+1):
         for input_partition in input_partitions[i]:
             for output_partition in output_partitions[i]:
-                acceptable_partitions += get_acceptable_connections(i,input_partition,output_partition,transaction.fee)
+                acceptable_partitions += get_acceptable_connections(i, input_partition, output_partition, transaction.fee)
     
     return acceptable_partitions
 
@@ -197,16 +201,14 @@ def transactions_from_partitions(transaction, partitions):
         partition_size = len(inputs)
 
         for i in range(partition_size):
-            transaction = Transaction(hash,inputs[i],outputs[i],fee)
+            transaction = Transaction(hash, inputs[i], outputs[i], fee)
             transactions.append(transaction)
 
     return transactions
 
 def func(transaction):
-    # print(f'    untangling transactions... [{os.getpid()}] {transaction.hash}', end='\r', flush=True)
-
-    # print(f'[{os.getpid()}] untangling transaction {transaction.hash}')
     if transaction.type == 'separable':
+
         partitions = get_acceptable_partitions(transaction)
         sub_transactions = transactions_from_partitions(transaction, partitions)
         return sub_transactions
@@ -217,112 +219,130 @@ def func(transaction):
 # --- transaction simplification ---
 
 def consolodate_same_addresses(transaction):
-	# consolodate input addresses
-	input_dict = {}
-	for input in transaction.inputs:
-		if input[0] in input_dict:
-			input_dict[input[0]] += input[1]
-		else:
-			input_dict[input[0]] = input[1]
-	transaction.inputs = list(input_dict.items())
+    # consolodate input addresses
+    input_dict = {}
+    for input in transaction.inputs:
+        if input[0] in input_dict:
+            input_dict[input[0]] += input[1]
+        else:
+            input_dict[input[0]] = input[1]
+    transaction.inputs = list(input_dict.items())
 
-	# consolodate output addresses
-	output_dict = {}
-	for output in transaction.outputs:
-		if output[0] in output_dict:
-			output_dict[output[0]] += output[1]
-		else:
-			output_dict[output[0]] = output[1]
-	transaction.outputs = list(output_dict.items())
+    # consolodate output addresses
+    output_dict = {}
+    for output in transaction.outputs:
+        if output[0] in output_dict:
+            output_dict[output[0]] += output[1]
+        else:
+            output_dict[output[0]] = output[1]
+    transaction.outputs = list(output_dict.items())
 
-	return transaction
+    # consolodate addresses that appear in both the inputs and outputs
+    for input in transaction.inputs:
+        for output in transaction.outputs:
+            if input[0] == output[0]:
+                if output[1] > input[1]:
+                    output[1] -= input[1]
+                    transaction.outputs.remove(output)
+
+                else:
+                    input[1] -= output[1]
+                    transaction.intpus.remove(input)
+
+
+    return transaction
 
 def sort_key(input):
-	return input[1]
+    return input[1]
 
 def remove_small_inputs(transaction):
+    transaction.inputs.sort(key=sort_key)
+    
+    inputs_to_remove = []
+    for input in transaction.inputs:
+        if input[1] <= transaction.fee:
+            inputs_to_remove.append(input)
+            transaction.fee -= input[1]
+        else:
+            break
 
-	transaction.inputs.sort(key=sort_key)
-	inputs_to_remove = []
-	for input in transaction.inputs:
-		if input[1] <= transaction.fee:
-			inputs_to_remove.append(input)
-			transaction.fee -= input[1]
-		else:
-			break
+    transaction.inputs = [x for x in transaction.inputs if not x in inputs_to_remove]
+    return transaction
 
-	transaction.inputs = [x for x in transaction.inputs if not x in inputs_to_remove]
-	return transaction
-
+# small output removal criteria from "Shared Send Untangling in Bitcoin"
 def remove_small_outputs(transaction):
-	acceptable_partitions = get_acceptable_partitions(transaction)
+    acceptable_partitions = get_acceptable_partitions(transaction)
 
-	# find the largets minimum change in value from inputs to outputs over all subsets from all partitions
-	delta = 0
-	for partition in acceptable_partitions:
-		input_partition = partition[0]
-		output_partition = partition[1]
-		partition_size = len(input_partition)
+    # find the largets minimum change in value from inputs to outputs over all subsets from all partitions
+    delta = 0
+    for partition in acceptable_partitions:
+        input_partition = partition[0]
+        output_partition = partition[1]
+        partition_size = len(input_partition)
 
-		input_subset = input_partition[0]
-		output_subset = output_partition[0]
+        input_subset = input_partition[0]
+        output_subset = output_partition[0]
 
-		# find the smallest net change in value from inputs to outputs over all subsets in the partition
-		min_flow = sum([x[1] for x in input_subset]) - sum([x[1] for x in output_subset])
-		for i in range(1,partition_size):
-			input_subset = input_partition[i]
-			output_subset = output_partition[i]
+        # find the smallest net change in value from inputs to outputs over all subsets in the partition
+        min_flow = sum([input[1] for input in input_subset]) - sum([output[1] for output in output_subset])
+        for i in range(1, partition_size):
+            input_subset = input_partition[i]
+            output_subset = output_partition[i]
 
-			flow = sum([x[1] for x in input_subset]) - sum([x[1] for x in output_subset])
-			if flow < min_flow:
-				min_flow = flow
-		
-		if min_flow > delta:
-			delta = min_flow
+            flow = sum([input[1] for input in input_subset]) - sum([output[1] for output in output_subset])
+            if flow < min_flow:
+                min_flow = flow
+        
+        if min_flow > delta:
+            delta = min_flow
 
-	transaction.outputs.sort(key=sort_key)
-	outputs_to_remove = []
-	for output in transaction.outputs:
-		if output[1] <= delta:
-			outputs_to_remove.append(output)
-			transaction.fee += output[1]
+    transaction.outputs.sort(key=sort_key)
 
-	transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
-	return transaction
+    outputs_to_remove = []
+    for output in transaction.outputs:
+        if output[1] <= delta:
+            outputs_to_remove.append(output)
+            transaction.fee += output[1]
+        else:
+            break
 
-def simplify(transaction):
-	if (    len(transaction.inputs) != 1 
+    transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
+    return transaction
+
+def simplify_transactions(transaction):
+    if (    len(transaction.inputs) != 1 
         and len(transaction.outputs) != 1
         and transaction.type != 'intractable'):
-		old_num_inputs = len(transaction.inputs)
-		old_num_outputs = len(transaction.outputs)
 
-		transaction = consolodate_same_addresses(transaction)
-		transaction = remove_small_inputs(transaction)
-		transaction = remove_small_outputs(transaction)
+        old_num_inputs = len(transaction.inputs)
+        old_num_outputs = len(transaction.outputs)
 
-		new_num_inputs = len(transaction.inputs)
-		new_num_outputs = len(transaction.outputs)
+        transaction = consolodate_same_addresses(transaction)
+        transaction = remove_small_inputs(transaction)
+        transaction = remove_small_outputs(transaction)
 
-		if new_num_inputs != old_num_inputs or new_num_outputs != old_num_outputs:
-			transaction.type = 'unclassified'
+        new_num_inputs = len(transaction.inputs)
+        new_num_outputs = len(transaction.outputs)
 
-	return transaction
+        if new_num_inputs != old_num_inputs or new_num_outputs != old_num_outputs:
+            transaction.type = 'unclassified'
+
+    return transaction
 
 # --- transaction classification ---
 
-def classify(transaction):
+def classify_transaction(transaction):
     try:
         if transaction.type == 'unclassified':
 
-                tx_size_limit = 8
+                TX_SIZE_LIMIT = 8
                 if transaction.inputs == [('coinbase','')]:
                     transaction.type = 'simple'
 
                 elif len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
                     transaction.type = 'simple'
 
-                elif len(transaction.inputs) >= tx_size_limit or len(transaction.outputs) >= tx_size_limit:
+                elif len(transaction.inputs) >= TX_SIZE_LIMIT or len(transaction.outputs) >= TX_SIZE_LIMIT:
                     transaction.type = 'intractable'
 
                 else:
@@ -342,7 +362,7 @@ def classify(transaction):
 
 # --- misc ---
 
-def profile(transactions):
+def profile_transactions(transactions):
     type_dict = {
         'total': 0,
         'unclassified': 0,
