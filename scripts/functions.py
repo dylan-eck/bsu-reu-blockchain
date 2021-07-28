@@ -341,8 +341,11 @@ def simplify_transaction(transaction):
         transaction = remove_small_inputs(transaction)
         print('done')
 
+        # at this state some transactions will have zero inputs or zero outputs
+        # the remove small outputs function does not handle these transactions well, so they are skipped
         print('    removing small outputs... ', end='', flush=True)
-        transaction = remove_small_outputs(transaction)
+        if not len(transaction.inputs) == 0 and not len(transaction.outputs) == 0:
+            transaction = remove_small_outputs(transaction)
         print('done')
 
         new_num_inputs = len(transaction.inputs)

@@ -38,6 +38,15 @@ def simplify_transactions(data_io_directory, file_pattern):
         simplified_transactions = pool.map(simplify_transaction, transactions)
         print(f'done')
 
+        # some simplified transactions will have zero inputs or zero outputs
+        # theses transactions will not be included in the output 
+        transactions_to_remove = []
+        for transactions in simplified_transactions:
+            if len(transaction.inputs) == 0 or len(transaction.outputs) == 0:
+                transactions_to_remove.append(transaction)
+        
+        simplified_transactions = [tx for tx in simplified_transactions if not tx in transactions_to_remove]
+
         # simplifying a transaction could potentially change it classification
         # so all simplifed transactions should be reclassified
         print(f'{indent}    reclassifying simplifed transactions... ', end='', flush=True)
