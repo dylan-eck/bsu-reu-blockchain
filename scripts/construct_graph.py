@@ -34,19 +34,14 @@ def link_cluster_addresses_isolated(cluster_dict, transaction):
     tx_cluster_dict = {}
     for address in (input_addresses + output_addresses):
 
-        try:
-            # check to see if the address is a member of a cluster
+        if address in cluster_dict:
             cluster = cluster_dict[address]
 
-        except:
-            print(f'{address} not a key in cluster_dict')
-            continue
+            if cluster in tx_cluster_dict:
+                tx_cluster_dict[cluster].append(address)
 
-        if cluster in tx_cluster_dict:
-            tx_cluster_dict[cluster].append(address)
-
-        else:
-            tx_cluster_dict[cluster] = [address]
+            else:
+                tx_cluster_dict[cluster] = [address]
 
     # check to see if any of the addresses in the transaction belong to a common cluster
     # if they do, add edges between them
