@@ -41,7 +41,7 @@ def simplify_transactions(data_io_directory, file_pattern):
         # some simplified transactions will have zero inputs or zero outputs
         # theses transactions will not be included in the output 
         transactions_to_remove = []
-        for transactions in simplified_transactions:
+        for transaction in simplified_transactions:
             if len(transaction.inputs) == 0 or len(transaction.outputs) == 0:
                 transactions_to_remove.append(transaction)
         
