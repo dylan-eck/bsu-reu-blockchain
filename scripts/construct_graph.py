@@ -54,7 +54,7 @@ def link_cluster_addresses_isolated(cluster_dict, transaction):
         addresses = tx_cluster_dict[key]
         if len(addresses) > 1:
             for (source, target) in combinations(addresses, 2):
-                edges.append((source, target))
+                edges.append((source, target, {'cluster': key}))
 
     return edges
 
