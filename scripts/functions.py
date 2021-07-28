@@ -220,6 +220,8 @@ def func(transaction):
 # --- transaction simplification ---
 
 def consolodate_same_addresses(transaction):
+    print(transaction.hash)
+
     # consolodate input addresses
     input_dict = {}
     for input in transaction.inputs:
@@ -239,24 +241,26 @@ def consolodate_same_addresses(transaction):
     transaction.outputs = list(output_dict.items())
 
     # consolodate addresses that appear in both the inputs and outputs
-    for input in transaction.inputs:
-        for output in transaction.outputs:
+    inputs_to_remove = []
+    outputs_to_remove = []
+    for (i, input) in enumerate(transaction.inputs):
+        for (j, output) in enumerate(transaction.outputs):
+
             if input[0] == output[0]:
                 if output[1] > input[1]:
                     new_output = (output[0], output[1] - input[1])
                     
-                    transaction.inputs.remove(input)
-                    transaction.outputs.remove(output)
-                    transaction.outputs.append(new_output)
+                    inputs_to_remove.append(input)
+                    transaction.outputs[j] = new_output
 
                 else:
                     new_input = (input[0], input[1] - output[1])
-                    
-                    transaction.inputs.remove(input)
-                    transaction.outputs.remove(output)
-                    transaction.outputs.append(new_input)
 
+                    transaction.inputs[i] = new_input
+                    outputs_to_remove.append(output)
 
+    transaction.inputs = [input for input in transaction.inputs if not input in inputs_to_remove]
+    transaction.outputs = [output for output in transaction.outputs if not output in outputs_to_remove]
 
     return transaction
 
@@ -318,6 +322,7 @@ def remove_small_outputs(transaction):
     return transaction
 
 def simplify_transaction(transaction):
+    # print(f'\r{transaction.hash}', end='', flush= True)
     if (    len(transaction.inputs) != 1 
         and len(transaction.outputs) != 1
         and transaction.type != 'intractable'):

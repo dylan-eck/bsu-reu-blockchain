@@ -25,9 +25,9 @@ def simplify_transactions(data_io_directory, file_pattern):
 
         print(f'{indent}processing file raw_transactions_classified/{file_name}:\n')
 
-        print(f'{indent}    loading transactions... ', end='', flush=True)
+        # print(f'{indent}    loading transactions... ', end='', flush=True)
         transactions = load_transactions_from_csv(f'{input_directory}/{file_name}')
-        print('done')
+        # print('done')
 
         tx_summary = profile_transactions(transactions)
         for (key, val) in tx_summary.items():
