@@ -325,7 +325,6 @@ def remove_small_outputs(transaction):
     return transaction
 
 def simplify_transaction(transaction):
-    print(transaction.hash)
     if (    len(transaction.inputs) != 1 
         and len(transaction.outputs) != 1
         and transaction.type != 'intractable'):
@@ -333,20 +332,13 @@ def simplify_transaction(transaction):
         old_num_inputs = len(transaction.inputs)
         old_num_outputs = len(transaction.outputs)
 
-        print('    consolodating addresses... ', end='', flush=True)
         transaction = consolodate_same_addresses(transaction)
-        print('done')
-
-        print('    removing small inputs... ', end='', flush=True)
         transaction = remove_small_inputs(transaction)
-        print('done')
 
         # at this state some transactions will have zero inputs or zero outputs
-        # the remove small outputs function does not handle these transactions well, so they are skipped
-        print('    removing small outputs... ', end='', flush=True)
+        # the remove_small_outputs function does not handle these transactions well, so they are skipped
         if not len(transaction.inputs) == 0 and not len(transaction.outputs) == 0:
             transaction = remove_small_outputs(transaction)
-        print('done')
 
         new_num_inputs = len(transaction.inputs)
         new_num_outputs = len(transaction.outputs)
