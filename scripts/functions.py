@@ -243,12 +243,19 @@ def consolodate_same_addresses(transaction):
         for output in transaction.outputs:
             if input[0] == output[0]:
                 if output[1] > input[1]:
-                    output[1] -= input[1]
+                    new_output = (output[0], output[1] - input[1])
+                    
+                    transaction.inputs.remove(input)
                     transaction.outputs.remove(output)
+                    transaction.outputs.append(new_output)
 
                 else:
-                    input[1] -= output[1]
-                    transaction.intpus.remove(input)
+                    new_input = (input[0], input[1] - output[1])
+                    
+                    transaction.inputs.remove(input)
+                    transaction.outputs.remove(output)
+                    transaction.outputs.append(new_input)
+
 
 
     return transaction
