@@ -1,11 +1,16 @@
 from time import perf_counter
 import networkx as nx
 import random
+import os
 
 def select_addresses(data_io_directory, graph_name):
     global indent # used for output formatting
 
     start = perf_counter()
+
+    # if a selected addresses file already exists, do not create a new one
+    if os.path.exists(f'{data_io_directory}/selected_addresses.csv'):
+        return
 
     print(f'{indent}loading graph... ', end='', flush=True)
     address_graph = nx.read_gpickle(f'{data_io_directory}/{graph_name}')
