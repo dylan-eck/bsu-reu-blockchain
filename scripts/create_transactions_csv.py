@@ -12,9 +12,11 @@ import json
 import re
 import os
 
+from networkx.algorithms.planarity import check_planarity
+
 from transaction import Transaction
 
-def get_day_directories(block_data_directory):
+def get_day_dir_names(block_data_directory):
     day_directories = []
 
     for (root, dirs, files) in os.walk(block_data_directory):
@@ -25,7 +27,7 @@ def get_day_directories(block_data_directory):
 
     return day_directories
 
-def get_block_files(day_directory):
+def get_block_file_names(day_directory):
     block_files = []
 
     for (root, dirs, files) in os.walk(day_directory):
@@ -85,72 +87,85 @@ def get_tx_data(block):
     return transaction_data
 
 def collect_transactions_by_chunk(input_directory, output_directory, chunk_size, num_chunks=None):
-    day_directories = get_day_directories(input_directory)
+    day_dir_names = get_day_dir_names(input_directory)
 
     output_directory = f'{output_directory}/raw_transactions_unclassified'
+    
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
     transactions = []
     chunk_num = 1
+    chunks_created = False
     print(f'    collecting chunk {chunk_num}... ', end='', flush=True)
-    for directory_name in day_directories:
-        block_files = get_block_files(f'{input_directory}/{directory_name}')
+    for day_dir_name in day_dir_names:
+        block_file_names = get_block_file_names(f'{input_directory}/{day_dir_name}')
 
-        for file_name in block_files:
-            with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
+        for block_file_name in block_file_names:
+            with open(f'{input_directory}/{day_dir_name}/{block_file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
                 
                 if len(transactions) > chunk_size:
-                    
                     extra_transactions = []
+
                     while len(transactions) > chunk_size:
                         extra_transactions.append(transactions.pop())
 
-                    out_file_name =f'{output_directory}/transactions_{chunk_num}.csv'
+                    out_file_name = f'{output_directory}/transactions_{chunk_num}.csv'
                     with open(out_file_name, 'w') as output_file:
+
                         csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
                         output_file.write(csv_headers)
+
                         for transaction in transactions:
                             output_file.write(transaction.to_csv_string())
-
                     print('done')
+
+                    chunks_created = True
+
                     if num_chunks and chunk_num == num_chunks:
                         return
+                    
                     transactions = extra_transactions
                     chunk_num += 1
                     print(f'    collecting chunk {chunk_num}... ', end='', flush=True)
 
+    if not chunks_created:
+        print(f'no chunks created, insufficient number of input transactions')
+        raise
+
 def collect_transactions_by_day(input_directory, output_directory):
-    day_directories = get_day_directories(input_directory)
+    day_dir_names = get_day_dir_names(input_directory)
 
     if not os.path.exists(f'{output_directory}/raw_transactions_unclassified'):
         os.mkdir(f'{output_directory}/raw_transactions_unclassified')
 
-    for directory_name in day_directories:
+    for day_dir_name in day_dir_names:
         day_start = perf_counter()
-
-        print(f'    processing day {directory_name}:\n')
+        print(f'    processing day {day_dir_name}:\n')
 
         print(f'        locating block files... ', end='', flush=True)
-        block_files = get_block_files(f'{input_directory}/{directory_name}')
+        block_file_names = get_block_file_names(f'{input_directory}/{day_dir_name}')
         print('done')
 
         transactions = []
-        for file_name in block_files:
-            print(f'        processing blocks... {file_name[:7]}..{file_name[-12:-5]}', end='\r', flush=True)
-            with open(f'{input_directory}/{directory_name}/{file_name}') as input_file:
+        for block_file_name in block_file_names:
+            print(f'        processing blocks... {block_file_name[:7]}..{block_file_name[-12:-5]}', end='\r', flush=True)
+            
+            with open(f'{input_directory}/{day_dir_name}/{block_file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
 
         print(f'{f"        processing blocks... done":<79}')
 
         print(f'        writing new csv file... ', end='', flush=True)
-        out_file_name =f'{output_directory}/raw_transactions_unclassified/{directory_name}.csv'
+        out_file_name =f'{output_directory}/raw_transactions_unclassified/{day_dir_name}.csv'
         with open(out_file_name, 'w') as output_file:
+
             csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
             output_file.write(csv_headers)
+
             for transaction in transactions:
                 output_file.write(transaction.to_csv_string())
         print('done')
@@ -158,7 +173,7 @@ def collect_transactions_by_day(input_directory, output_directory):
         day_end = perf_counter()
         print(f'        finished in {day_end - day_start:.2f}s\n')
 
-FILL_CHAR_DASH = '-'
+FILL_CHAR_DASH = '-' # used for output formatting
 
 if __name__ == '__main__':
     # command line interface
@@ -190,10 +205,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    print(f'{"":{FILL_CHAR_DASH}<79}')
-    print('creating raw transaction csv files:')
-    print(f'{"":{FILL_CHAR_DASH}<79}\n')
-
+    # process command line arguments
     DEFAULT_INPUT_DIRECTORY = '../block_data'
     DEFUALT_OUTPUT_DIRECTORY = '../data_out'
 
@@ -213,6 +225,10 @@ if __name__ == '__main__':
 
     collection_start = perf_counter()
 
+    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print('creating raw transaction csv files:')
+    print(f'{"":{FILL_CHAR_DASH}<79}\n')
+
     if args.group_by_days:
         print('    grouping transactions by date\n')
         collect_transactions_by_day(input_directory, output_directory)
@@ -220,10 +236,11 @@ if __name__ == '__main__':
     elif args.group_by_chunks:
         chunk_size = args.group_by_chunks[0]
         num_chunks = args.group_by_chunks[1]
+
         print(f'    grouping transactions into {num_chunks} batches of size {chunk_size:,}\n')
         collect_transactions_by_chunk(input_directory, output_directory, chunk_size, num_chunks)
         print()
 
     collection_end = perf_counter()
     execution_time_s = collection_end - collection_start
-    print(f'    finished creating csv files in {execution_time_s/60:.2f} minutes\n')
+    print(f'    finished creating csv files in {execution_time_s:.2f}s\n')
