@@ -19,28 +19,22 @@ if __name__ == '__main__':
                         help='directory where files will be read/written'
                         )
 
-    parser.add_argument('-f', '--fname-con',
-                        dest='fname_con',
+    parser.add_argument('-f', '--file-regex',
+                        dest='file_regex',
                         type=str,
-                        help='naming convention for target files'
+                        help='regex pattern used to locate input files'
                         )
 
     parser.add_argument('-c', '-cluster',
                         dest='clusters',
                         type=str,
                         nargs=1,
-                        help='tells the graph constructor that clusters are being used')
+                        help='use clusterd from the specified file during graph construction')
 
     args = parser.parse_args()
 
-    if args.clusters:
-        clusters = args.clusters[0]
-    
-    else:
-        clusters = None
-
+    # process comman line arguments 
     DEFUALT_IO_DIRECTORY = '../data_out'
-
     if args.io_directory:
         io_directory = args.io_directory
         print(f'using user-specified input directory {io_directory}')
@@ -48,16 +42,17 @@ if __name__ == '__main__':
         io_directory = DEFUALT_IO_DIRECTORY
         print(f'using default input directory {io_directory}')
 
-    # "^[0-9]{4}-[0-9]{2}-[0-9]{2}.csv$"
-    # "^tramsactions_[0-9]*.csv$"
-    file_naming_convention = args.fname_con
-
-    # create io directory, if it does not already exist
     if not os.path.exists(io_directory):
         os.mkdir(io_directory)
 
-    # used for formatting
-    FILL_CHAR_DASH = '-'
+    file_regex_pattern = args.file_regex
+
+    if args.clusters:
+        clusters = args.clusters[0]
+    else:
+        clusters = None
+
+    FILL_CHAR_DASH = '-' # used for ouput formatting
 
     main_start = perf_counter()
 
@@ -66,78 +61,59 @@ if __name__ == '__main__':
     print('classifying raw transactions and creating new csv files:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    classify_transactions(io_directory, file_naming_convention)
-
-    print()
+    classify_transactions(io_directory, file_regex_pattern)
 
     # simplify transactions 
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('simplifying transactions:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    simplify_transactions(io_directory, file_naming_convention)
-
-    print()
+    simplify_transactions(io_directory, file_regex_pattern)
 
     # untangle transactions
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('untangling transactions:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    untangle_transactions(io_directory, file_naming_convention)
-
-    print()
+    untangle_transactions(io_directory, file_regex_pattern)
 
     # construct address graph for transaction selection
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_naming_convention, 'selection_graph.pickle')
-
-    print()
+    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_regex_pattern, 'selection_graph.pickle')
 
     # select addresses to be used for path finding
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('selecting addresses for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
     select_addresses(io_directory, 'selection_graph.pickle')
 
-    print()
-
     # construct address graph for path finding
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('constructing address graph for pathfinding:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
     if clusters:
-        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters, linked=True)
+        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_regex_pattern, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters, linked=True)
 
     else:
-        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle')
-
-    print()
+        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_regex_pattern, 'pf_graph.pickle')
 
     # perform pathfinding 
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('finding paths between addresses:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
     find_paths(io_directory, f'{io_directory}/pf_graph.pickle')
 
-    print()
-
     # display information about main.py execution
     main_end = perf_counter()
 
-    print(f'{"":{FILL_CHAR_DASH}<79}')
+    print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('post excution summary:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    print(f'    total execution time: {(main_end - main_start)/60:.2f} minutes')
-    print()
-
-
-
-
+    print(f'    total execution time: {(main_end - main_start)/60:.2f} minutes\n')
