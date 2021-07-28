@@ -20,7 +20,7 @@ def load_clusters(cluster_file_path):
         
     return cluster_dict
 
-def link_cluster_addresses(cluster_dict, transaction):
+def link_cluster_addresses_isolated(cluster_dict, transaction):
     edges = []
     
     input_addresses = [input[0] for input in transaction.inputs]
@@ -52,7 +52,7 @@ def link_cluster_addresses(cluster_dict, transaction):
 
     return edges
 
-def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None):
+def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None, linked=False):
     nodes = []
     edges = []
 
@@ -90,13 +90,24 @@ def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None):
                 nodes[nodes.index(j)] = (j, {'in_mtm': True})
 
     if with_clusters:
-        cluster_edges = link_cluster_addresses(cluster_dict, transaction)
-        for edge in cluster_edges:
-            edges.append(edge)
+        if linked:
+            # create nodes for clusters and link all addresses in the cluster to the cluster node
+            for address in (input_addresses + output_addresses):
+                if address in cluster_dict and cluster_dict[address]:
+                    edges.append((address, cluster_dict[address]))
+
+        else:
+            # directly connect clustered address, but only if they are in a common transaction
+            cluster_edges = link_cluster_addresses_isolated(cluster_dict, transaction)
+            for edge in cluster_edges:
+                edges.append(edge)
+
+
+
 
     return (nodes, edges)
 
-def construct_graph(input_directory, output_directory, file_pattern, graph_name, with_clusters=False, cluster_file_path=''):
+def construct_graph(input_directory, output_directory, file_pattern, graph_name, with_clusters=False, cluster_file_path='', linked=False):
     program_start = perf_counter()
 
     indent = ''

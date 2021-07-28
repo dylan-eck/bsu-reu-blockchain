@@ -112,7 +112,7 @@ if __name__ == '__main__':
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
     if clusters:
-        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters)
+        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters, linked=True)
 
     else:
         construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_naming_convention, 'pf_graph.pickle')
