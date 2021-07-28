@@ -310,7 +310,7 @@ def remove_small_outputs(transaction):
     transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
     return transaction
 
-def simplify_transactions(transaction):
+def simplify_transaction(transaction):
     if (    len(transaction.inputs) != 1 
         and len(transaction.outputs) != 1
         and transaction.type != 'intractable'):

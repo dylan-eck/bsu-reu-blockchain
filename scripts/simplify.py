@@ -2,7 +2,7 @@ from time import perf_counter
 import multiprocessing as mp
 import os
 
-from functions import classify_transaction, get_file_names_regex, load_transactions_from_csv, simplify_transactions, profile_transactions
+from functions import classify_transaction, get_file_names_regex, load_transactions_from_csv, simplify_transaction, profile_transactions
 
 def simplify_transactions(data_io_directory, file_pattern):
     global indent # used for output formatting
@@ -35,7 +35,7 @@ def simplify_transactions(data_io_directory, file_pattern):
         print()
 
         print(f'{indent}    simplifying transactions... ', end='', flush=True)
-        simplified_transactions = pool.map(simplify_transactions, transactions)
+        simplified_transactions = pool.map(simplify_transaction, transactions)
         print(f'done')
 
         # simplifying a transaction could potentially change it classification
