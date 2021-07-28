@@ -1,5 +1,4 @@
 from time import perf_counter
-from functools import partial
 from itertools import combinations
 import networkx as nx
 import multiprocessing as mp
@@ -16,18 +15,19 @@ def get_path_length(addr_pair):
         path = nx.bidirectional_shortest_path(pf_graph, source, target)
         path_length = len(path)
         
-    except (nx.NetworkXNoPath, nx.NodeNotFound):
+    except nx.NetworkXNoPath:
         path_length = -1
 
-    print(f'{indent}finding paths... {source[:7]}..{source[-7:]} --> {target[:7]}..{target[-7:]} : {path_length}', end='\r', flush=True)
+    except nx.NodeNotFound:
+        path_length = -1
+        print(f' {source[:7]}..{source[-7:]} or {target[:7]}..{target[-7:]} not in graph')
 
     return (addr_pair, path_length)
 
 def find_paths(data_io_directory, graph_path):
-    pf_start = perf_counter()
-
     global indent
-    indent = '' if __name__ == '__main__' else '    '
+
+    pf_start = perf_counter()
     
     # load graph
     print(f'{indent}loading graph... ', end='', flush=True)
@@ -41,6 +41,7 @@ def find_paths(data_io_directory, graph_path):
     addresses =  []
     with open(address_file, 'r') as input_file:
         input_file.readline()
+
         for line in input_file:
             addresses.append(line.strip())
     print('done')
@@ -49,11 +50,11 @@ def find_paths(data_io_directory, graph_path):
     thread_count = mp.cpu_count()
     pool = mp.Pool(processes=thread_count)
 
-    # print(f'{indent}finding paths... ', end='', flush=True)
+    print(f'{indent}finding paths... ', end='', flush=True)
     results = pool.map(get_path_length, combinations(addresses, 2))
     print(f'{f"{indent}finding paths... done":<79}')
 
-    # create matrix
+    # create path matrix
     print(f'{indent}creating path matrix... ', end='', flush=True)
     path_matrix = {}
     for result in results:
@@ -85,7 +86,9 @@ def find_paths(data_io_directory, graph_path):
     print('done')
 
     pf_end = perf_counter()
-    print(f'{indent}execution finished in {(pf_end - pf_start)/60:.2f} minutes')
+    print(f'{indent}execution finished in {pf_end - pf_start:.2f}s')
+
+indent = '' if __name__ == '__main__' else '    '
 
 if __name__ == '__main__':
     find_paths('../data_out', '../data_out/pf_graph.pickle')
