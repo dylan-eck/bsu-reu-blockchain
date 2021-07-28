@@ -333,9 +333,17 @@ def simplify_transaction(transaction):
         old_num_inputs = len(transaction.inputs)
         old_num_outputs = len(transaction.outputs)
 
+        print('    consolodating addresses... ', end='', flush=True)
         transaction = consolodate_same_addresses(transaction)
+        print('done')
+
+        print('    removing small inputs... ', end='', flush=True)
         transaction = remove_small_inputs(transaction)
+        print('done')
+
+        print('    removing small outputs... ', end='', flush=True)
         transaction = remove_small_outputs(transaction)
+        print('done')
 
         new_num_inputs = len(transaction.inputs)
         new_num_outputs = len(transaction.outputs)
