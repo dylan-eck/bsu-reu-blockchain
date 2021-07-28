@@ -220,8 +220,6 @@ def func(transaction):
 # --- transaction simplification ---
 
 def consolodate_same_addresses(transaction):
-    print(transaction.hash)
-
     # consolodate input addresses
     input_dict = {}
     for input in transaction.inputs:
@@ -247,7 +245,12 @@ def consolodate_same_addresses(transaction):
         for (j, output) in enumerate(transaction.outputs):
 
             if input[0] == output[0]:
-                if output[1] > input[1]:
+
+                if input[1] == output[1]:
+                    inputs_to_remove.append(input)
+                    outputs_to_remove.append(output)
+
+                elif output[1] > input[1]:
                     new_output = (output[0], output[1] - input[1])
                     
                     inputs_to_remove.append(input)
@@ -322,7 +325,7 @@ def remove_small_outputs(transaction):
     return transaction
 
 def simplify_transaction(transaction):
-    # print(f'\r{transaction.hash}', end='', flush= True)
+    print(transaction.hash)
     if (    len(transaction.inputs) != 1 
         and len(transaction.outputs) != 1
         and transaction.type != 'intractable'):
