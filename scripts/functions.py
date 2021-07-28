@@ -33,6 +33,7 @@ def load_transactions_from_csv(csv_file_path):
             transaction = Transaction()
             transaction.from_csv_string(line)
 
+            # coinbase transactions are not processed
             if not transaction.is_coinbase():
                 transactions.append(transaction)
 
