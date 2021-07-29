@@ -4,31 +4,34 @@ import networkx as nx
 import multiprocessing as mp
 import pickle
 
+
 def get_path_length(addr_pair):
     path_length = 0
 
     source = addr_pair[0]
     target = addr_pair[1]
-    
+
     try:
         global pf_graph
         path = nx.bidirectional_shortest_path(pf_graph, source, target)
         path_length = len(path)
-        
+
     except nx.NetworkXNoPath:
         path_length = -1
 
     except nx.NodeNotFound:
         path_length = -1
-        print(f' {source[:7]}..{source[-7:]} or {target[:7]}..{target[-7:]} not in graph')
+        print(
+            f' {source[:7]}..{source[-7:]} or {target[:7]}..{target[-7:]} not in graph')
 
     return (addr_pair, path_length)
+
 
 def find_paths(data_io_directory, graph_path):
     global indent
 
     pf_start = perf_counter()
-    
+
     # load graph
     print(f'{indent}loading graph... ', end='', flush=True)
     global pf_graph
@@ -38,7 +41,7 @@ def find_paths(data_io_directory, graph_path):
     # load addresses
     print(f'{indent}loading addresses... ', end='', flush=True)
     address_file = f'{data_io_directory}/selected_addresses.csv'
-    addresses =  []
+    addresses = []
     with open(address_file, 'r') as input_file:
         input_file.readline()
 
@@ -62,7 +65,7 @@ def find_paths(data_io_directory, graph_path):
         target = result[0][1]
         path_length = result[1]
 
-        if not source in path_matrix:
+        if source not in path_matrix:
             pl_dict = {}
             pl_dict[target] = path_length
 
@@ -80,13 +83,17 @@ def find_paths(data_io_directory, graph_path):
     print(f'{indent}found {num_paths:,} paths')
 
     # write matrix to file
-    print(f'{indent}writing path matrix to pickle file... ', end='', flush=True)
+    print(
+        f'{indent}writing path matrix to pickle file... ',
+        end='',
+        flush=True)
     with open(f'{data_io_directory}/path_matrix.pickle', 'wb') as output_file:
         pickle.dump(path_matrix, output_file)
     print('done')
 
     pf_end = perf_counter()
     print(f'{indent}execution finished in {pf_end - pf_start:.2f}s')
+
 
 indent = '' if __name__ == '__main__' else '    '
 

@@ -16,6 +16,7 @@ from networkx.algorithms.planarity import check_planarity
 
 from transaction import Transaction
 
+
 def get_day_dir_names(block_data_directory):
     day_directories = []
 
@@ -26,6 +27,7 @@ def get_day_dir_names(block_data_directory):
                 day_directories.append(dir)
 
     return day_directories
+
 
 def get_block_file_names(day_directory):
     block_files = []
@@ -38,12 +40,13 @@ def get_block_file_names(day_directory):
 
     return block_files
 
+
 def get_inputs(transaction):
     inputs = []
 
     for input in transaction.get('inputs'):
         prev_out = input.get('prev_out')
-        
+
         if prev_out is not None:
             addr = prev_out.get('addr')
             value = prev_out.get('value')
@@ -51,9 +54,10 @@ def get_inputs(transaction):
             addr = 'coinbase'
             value = ''
 
-        inputs.append((addr, value)) 
+        inputs.append((addr, value))
 
     return inputs
+
 
 def get_outputs(transaction):
     outputs = []
@@ -63,9 +67,10 @@ def get_outputs(transaction):
         value = output.get('value')
 
         if addr is not None:
-            outputs.append((addr,value))
+            outputs.append((addr, value))
 
     return outputs
+
 
 def get_tx_data(block):
     transactions = block.get('tx')
@@ -80,17 +85,23 @@ def get_tx_data(block):
         outputs = get_outputs(transaction)
 
         if inputs and outputs:
-            if not None in chain(*inputs) and not None in chain(*outputs):
+            if None not in chain(*inputs) and None not in chain(*outputs):
                 transaction = Transaction(hash, inputs, outputs, fee)
                 transaction_data.append(transaction)
 
     return transaction_data
 
-def collect_transactions_by_chunk(input_directory, output_directory, chunk_size, num_chunks=None):
+
+def collect_transactions_by_chunk(
+        input_directory,
+        output_directory,
+        chunk_size,
+        num_chunks=None):
+
     day_dir_names = get_day_dir_names(input_directory)
 
     output_directory = f'{output_directory}/raw_transactions_unclassified'
-    
+
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
@@ -99,13 +110,14 @@ def collect_transactions_by_chunk(input_directory, output_directory, chunk_size,
     chunks_created = False
     print(f'    collecting chunk {chunk_num}... ', end='', flush=True)
     for day_dir_name in day_dir_names:
-        block_file_names = get_block_file_names(f'{input_directory}/{day_dir_name}')
+        block_file_names = get_block_file_names(
+            f'{input_directory}/{day_dir_name}')
 
         for block_file_name in block_file_names:
             with open(f'{input_directory}/{day_dir_name}/{block_file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
-                
+
                 if len(transactions) > chunk_size:
                     extra_transactions = []
 
@@ -126,14 +138,18 @@ def collect_transactions_by_chunk(input_directory, output_directory, chunk_size,
 
                     if num_chunks and chunk_num == num_chunks:
                         return
-                    
+
                     transactions = extra_transactions
                     chunk_num += 1
-                    print(f'    collecting chunk {chunk_num}... ', end='', flush=True)
+                    print(
+                        f'    collecting chunk {chunk_num}... ',
+                        end='',
+                        flush=True)
 
     if not chunks_created:
         print(f'no chunks created, insufficient number of input transactions')
         raise
+
 
 def collect_transactions_by_day(input_directory, output_directory):
     day_dir_names = get_day_dir_names(input_directory)
@@ -146,13 +162,17 @@ def collect_transactions_by_day(input_directory, output_directory):
         print(f'    processing day {day_dir_name}:\n')
 
         print(f'        locating block files... ', end='', flush=True)
-        block_file_names = get_block_file_names(f'{input_directory}/{day_dir_name}')
+        block_file_names = get_block_file_names(
+            f'{input_directory}/{day_dir_name}')
         print('done')
 
         transactions = []
         for block_file_name in block_file_names:
-            print(f'        processing blocks... {block_file_name[:7]}..{block_file_name[-12:-5]}', end='\r', flush=True)
-            
+            print(
+                f'        processing blocks... {block_file_name[:7]}..{block_file_name[-12:-5]}',
+                end='\r',
+                flush=True)
+
             with open(f'{input_directory}/{day_dir_name}/{block_file_name}') as input_file:
                 block = json.load(input_file)
                 transactions += get_tx_data(block)
@@ -160,7 +180,7 @@ def collect_transactions_by_day(input_directory, output_directory):
         print(f'{f"        processing blocks... done":<79}')
 
         print(f'        writing new csv file... ', end='', flush=True)
-        out_file_name =f'{output_directory}/raw_transactions_unclassified/{day_dir_name}.csv'
+        out_file_name = f'{output_directory}/raw_transactions_unclassified/{day_dir_name}.csv'
         with open(out_file_name, 'w') as output_file:
 
             csv_headers = 'transaction_hash,input_addresses,input_values,output_addresses,output_values,transaction_fee,classification\n'
@@ -173,36 +193,39 @@ def collect_transactions_by_day(input_directory, output_directory):
         day_end = perf_counter()
         print(f'        finished in {day_end - day_start:.2f}s\n')
 
-FILL_CHAR_DASH = '-' # used for output formatting
+
+FILL_CHAR_DASH = '-'  # used for output formatting
 
 if __name__ == '__main__':
     # command line interface
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--in-dir',
-                        dest='input_directory',
-                        type=str,
-                        help='a directory containing the input json files'
-                        )
+    parser.add_argument(
+        '-i', '--in-dir',
+        dest='input_directory',
+        type=str,
+        help='a directory containing the input json files')
 
-    parser.add_argument('-o', '-out-dir',
-                        dest='output_directory',
-                        type=str,
-                        help='the directoy where output csv files will be written'
-                        )
+    parser.add_argument(
+        '-o',
+        '-out-dir',
+        dest='output_directory',
+        type=str,
+        help='the directoy where output csv files will be written')
 
-    parser.add_argument('-d', '-days',
-                        dest='group_by_days',
-                        action='store_true',
-                        help='ouput csv files will be broken up by date'
-                        )
+    parser.add_argument(
+        '-d', '-days',
+        dest='group_by_days',
+        action='store_true',
+        help='ouput csv files will be broken up by date')
 
-    parser.add_argument('-c', '-chunks',
-                        dest='group_by_chunks',
-                        type=int,
-                        nargs=2,
-                        help='ouput csv files will be broken up into equal size chunks'
-                        )
-    
+    parser.add_argument(
+        '-c',
+        '-chunks',
+        dest='group_by_chunks',
+        type=int,
+        nargs=2,
+        help='ouput csv files will be broken up into equal size chunks')
+
     args = parser.parse_args()
 
     # process command line arguments
@@ -232,13 +255,18 @@ if __name__ == '__main__':
     if args.group_by_days:
         print('    grouping transactions by date\n')
         collect_transactions_by_day(input_directory, output_directory)
-    
+
     elif args.group_by_chunks:
         chunk_size = args.group_by_chunks[0]
         num_chunks = args.group_by_chunks[1]
 
-        print(f'    grouping transactions into {num_chunks} batches of size {chunk_size:,}\n')
-        collect_transactions_by_chunk(input_directory, output_directory, chunk_size, num_chunks)
+        print(
+            f'    grouping transactions into {num_chunks} batches of size {chunk_size:,}\n')
+        collect_transactions_by_chunk(
+            input_directory,
+            output_directory,
+            chunk_size,
+            num_chunks)
         print()
 
     collection_end = perf_counter()

@@ -13,27 +13,31 @@ if __name__ == '__main__':
     # command line interface
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-d', '--directory',
-                        dest='io_directory',
-                        type=str,
-                        help='directory where files will be read/written'
-                        )
+    parser.add_argument(
+        '-d',
+        '--directory',
+        dest='io_directory',
+        type=str,
+        help='directory where files will be read/written')
 
-    parser.add_argument('-f', '--file-regex',
-                        dest='file_regex',
-                        type=str,
-                        help='regex pattern used to locate input files'
-                        )
+    parser.add_argument(
+        '-f',
+        '--file-regex',
+        dest='file_regex',
+        type=str,
+        help='regex pattern used to locate input files')
 
-    parser.add_argument('-c', '-cluster',
-                        dest='clusters',
-                        type=str,
-                        nargs=1,
-                        help='use clusterd from the specified file during graph construction')
+    parser.add_argument(
+        '-c',
+        '-cluster',
+        dest='clusters',
+        type=str,
+        nargs=1,
+        help='use clusterd from the specified file during graph construction')
 
     args = parser.parse_args()
 
-    # process comman line arguments 
+    # process command line arguments
     DEFUALT_IO_DIRECTORY = '../data_out'
     if args.io_directory:
         io_directory = args.io_directory
@@ -52,7 +56,7 @@ if __name__ == '__main__':
     else:
         clusters = None
 
-    FILL_CHAR_DASH = '-' # used for ouput formatting
+    FILL_CHAR_DASH = '-'  # used for ouput formatting
 
     main_start = perf_counter()
 
@@ -63,7 +67,7 @@ if __name__ == '__main__':
 
     classify_transactions(io_directory, file_regex_pattern)
 
-    # simplify transactions 
+    # simplify transactions
     print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('simplifying transactions:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
@@ -82,7 +86,11 @@ if __name__ == '__main__':
     print('constructing address graph for address selection:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(f'{io_directory}/raw_transactions_classified', io_directory, file_regex_pattern, 'selection_graph.pickle')
+    construct_graph(
+        f'{io_directory}/raw_transactions_classified',
+        io_directory,
+        file_regex_pattern,
+        'selection_graph.pickle')
 
     # select addresses to be used for path finding
     print(f'\n{"":{FILL_CHAR_DASH}<79}')
@@ -97,12 +105,23 @@ if __name__ == '__main__':
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
     if clusters:
-        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_regex_pattern, 'pf_graph.pickle', with_clusters=True, cluster_file_path=clusters, linked=True)
+        construct_graph(
+            f'{io_directory}/untangled_transactions',
+            io_directory,
+            file_regex_pattern,
+            'pf_graph.pickle',
+            with_clusters=True,
+            cluster_file_path=clusters,
+            linked=True)
 
     else:
-        construct_graph(f'{io_directory}/untangled_transactions', io_directory, file_regex_pattern, 'pf_graph.pickle')
+        construct_graph(
+            f'{io_directory}/untangled_transactions',
+            io_directory,
+            file_regex_pattern,
+            'pf_graph.pickle')
 
-    # perform pathfinding 
+    # perform pathfinding
     print(f'\n{"":{FILL_CHAR_DASH}<79}')
     print('finding paths between addresses:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
@@ -116,4 +135,5 @@ if __name__ == '__main__':
     print('post excution summary:')
     print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    print(f'    total execution time: {(main_end - main_start)/60:.2f} minutes\n')
+    print(
+        f'    total execution time: {(main_end - main_start)/60:.2f} minutes\n')

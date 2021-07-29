@@ -4,8 +4,9 @@ import os
 
 from functions import classify_transaction, get_file_names_regex, load_transactions_from_csv, simplify_transaction, profile_transactions
 
+
 def simplify_transactions(data_io_directory, file_pattern):
-    global indent # used for output formatting
+    global indent  # used for output formatting
 
     # multiprocessing is uses to speed up execution
     num_processes = mp.cpu_count()
@@ -26,7 +27,8 @@ def simplify_transactions(data_io_directory, file_pattern):
         print(f'{indent}processing file raw_transactions_classified/{file_name}:\n')
 
         # print(f'{indent}    loading transactions... ', end='', flush=True)
-        transactions = load_transactions_from_csv(f'{input_directory}/{file_name}')
+        transactions = load_transactions_from_csv(
+            f'{input_directory}/{file_name}')
         # print('done')
 
         tx_summary = profile_transactions(transactions)
@@ -39,17 +41,21 @@ def simplify_transactions(data_io_directory, file_pattern):
         print(f'done')
 
         # some simplified transactions will have zero inputs or zero outputs
-        # theses transactions will not be included in the output 
+        # theses transactions will not be included in the output
         transactions_to_remove = []
         for transaction in simplified_transactions:
             if len(transaction.inputs) == 0 or len(transaction.outputs) == 0:
                 transactions_to_remove.append(transaction)
-        
-        simplified_transactions = [tx for tx in simplified_transactions if not tx in transactions_to_remove]
+
+        simplified_transactions = [
+            tx for tx in simplified_transactions if tx not in transactions_to_remove]
 
         # simplifying a transaction could potentially change it classification
         # so all simplifed transactions should be reclassified
-        print(f'{indent}    reclassifying simplifed transactions... ', end='', flush=True)
+        print(
+            f'{indent}    reclassifying simplifed transactions... ',
+            end='',
+            flush=True)
         for index, tx in enumerate(simplified_transactions):
             if tx.type == 'unclassified':
                 simplified_transactions[index] = classify_transaction(tx)
@@ -63,14 +69,16 @@ def simplify_transactions(data_io_directory, file_pattern):
         print(f'{indent}    writing new csv file... ', end='', flush=True)
         with open(f'{output_directory}/{file_name}', 'w') as output_file:
 
-            output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-            
+            output_file.write(
+                'transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
+
             for transaction in simplified_transactions:
                 output_file.write(transaction.to_csv_string())
         print('done')
 
         simp_end = perf_counter()
         print(f'{indent}    finished in {simp_end - simp_start:.2f}s')
+
 
 indent = ''
 if __name__ != '__main__':

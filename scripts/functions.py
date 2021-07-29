@@ -7,6 +7,7 @@ from transaction import Transaction
 
 # --- file operations ---
 
+
 def get_immediate_subdirectories(directory_path):
     immediate_subdirectories = []
     for x in os.scandir(directory_path):
@@ -14,6 +15,7 @@ def get_immediate_subdirectories(directory_path):
             immediate_subdirectories.append(x)
 
     return immediate_subdirectories
+
 
 def get_file_names_regex(direcotry, pattern):
     file_names = []
@@ -23,6 +25,7 @@ def get_file_names_regex(direcotry, pattern):
             if pattern.match(file):
                 file_names.append(file)
     return file_names
+
 
 def load_transactions_from_csv(csv_file_path):
     transactions = []
@@ -39,6 +42,7 @@ def load_transactions_from_csv(csv_file_path):
 
     return transactions
 
+
 def write_csv(file_name, data):
     with open(file_name, 'w') as output_file:
         writer = csv.writer(output_file)
@@ -46,25 +50,27 @@ def write_csv(file_name, data):
 
 # --- transaction untangling ---
 
+
 def single_partition_to_string(partition):
     '''
-    input:        a partition of a set
+    input:      a partition of a set
 
     output:     the partition formated as a string that is easily readable
     '''
     partition_string = ''
     for i in range(len(partition)):
         subset_string = f'[{partition[i][0]}'
-        for j in range(1,len(partition[i])):
+        for j in range(1, len(partition[i])):
             subset_string += f' {partition[i][j]}'
         subset_string += ']'
         partition_string += f'{subset_string} - '
     partition_string = partition_string[:-3]
     return partition_string
 
+
 def tx_partition_to_string(tx_partition):
     '''
-    input:        a transaction partition
+    input:      a transaction partition
 
     returns:    the transaction partion formated as a string that is easily readable
     '''
@@ -73,7 +79,7 @@ def tx_partition_to_string(tx_partition):
     input_partition = tx_partition[0]
     output_partition = tx_partition[1]
     # input and output partitions should be the same size
-    partition_size = len(input_partition) 
+    partition_size = len(input_partition)
 
     for i in range(partition_size):
         input = [item[0] for item in input_partition[i]]
@@ -82,7 +88,10 @@ def tx_partition_to_string(tx_partition):
 
     return tx_partition_string
 
-# code for the following function modified from https://github.com/mrqc/partitions-of-set
+# code for the following function modified from
+# https://github.com/mrqc/partitions-of-set
+
+
 def get_codewords(n, k):
     codewords = []
     codeword = [1 for _ in range(0, n)]
@@ -90,10 +99,10 @@ def get_codewords(n, k):
         codewords.append(codeword.copy())
         startIndex = n - 1
         while startIndex >= 0:
-            if not codeword[0 : startIndex]:
+            if not codeword[0: startIndex]:
                 return codewords
             else:
-                maxValue = max(codeword[0 : startIndex])
+                maxValue = max(codeword[0: startIndex])
                 codewordAtStartIndex = codeword[startIndex]
                 if maxValue > k or codewordAtStartIndex > maxValue or codewordAtStartIndex >= k:
                     codeword[startIndex] = 1
@@ -102,9 +111,10 @@ def get_codewords(n, k):
                     codeword[startIndex] += 1
                     break
 
+
 def get_partitions(list, max_size):
     n = len(list)
-    codewords = get_codewords(n,max_size)
+    codewords = get_codewords(n, max_size)
 
     partitions = []
     for codeword in codewords:
@@ -116,16 +126,17 @@ def get_partitions(list, max_size):
         for i in range(len(codeword)):
             element = list[i]
             subset = codeword[i]
-            partition[subset-1].append(element)
-        
+            partition[subset - 1].append(element)
+
         partitions.append(partition)
     return partitions
 
+
 def group_partitions_by_size(partitions):
     '''
-    input:  a list of partitions (lists)
+    input:      a list of partitions (lists)
 
-    returns:  a dictionary where each key is an integer, and the corresponding value 
+    returns:    a dictionary where each key is an integer, and the corresponding value
     is a list of partitions with the corresponding number of subsets
     '''
     partition_dict = {}
@@ -138,6 +149,8 @@ def group_partitions_by_size(partitions):
     return partition_dict
 
 # connectability criteria from "Shared Send Untangling in Bitcoin"
+
+
 def is_connectable(input_subset, output_subset, transaction_fee):
     input_sum = sum([item[1] for item in input_subset])
     output_sum = sum([item[1] for item in output_subset])
@@ -145,16 +158,24 @@ def is_connectable(input_subset, output_subset, transaction_fee):
     a = output_sum + transaction_fee
     return(a >= input_sum and input_sum >= output_sum)
 
-def get_acceptable_connections(partition_size, input_partition, output_partition, transaction_fee):
+
+def get_acceptable_connections(
+        partition_size,
+        input_partition,
+        output_partition,
+        transaction_fee):
+
     acceptable_connections = []
 
-    # check the input partition against all possible orderings of the output partition
+    # check the input partition against all possible orderings of the output
+    # partition
     output_orders = list(permutations(output_partition, len(output_partition)))
     for output_ordering in output_orders:
         acceptable = True
 
         for i in range(partition_size):
-            pair_connectable = is_connectable(input_partition[i], output_ordering[i], transaction_fee)
+            pair_connectable = is_connectable(
+                input_partition[i], output_ordering[i], transaction_fee)
 
             if not pair_connectable:
                 acceptable = False
@@ -165,6 +186,7 @@ def get_acceptable_connections(partition_size, input_partition, output_partition
             acceptable_connections.append(partition)
 
     return acceptable_connections
+
 
 def get_acceptable_partitions(transaction):
     num_inputs = len(transaction.inputs)
@@ -179,16 +201,19 @@ def get_acceptable_partitions(transaction):
     output_partitions = group_partitions_by_size(output_partitions)
 
     acceptable_partitions = []
-    for i in range(2, max_partition_size+1):
+    for i in range(2, max_partition_size + 1):
         for input_partition in input_partitions[i]:
             for output_partition in output_partitions[i]:
-                acceptable_partitions += get_acceptable_connections(i, input_partition, output_partition, transaction.fee)
-    
+                acceptable_partitions += get_acceptable_connections(
+                    i, input_partition, output_partition, transaction.fee)
+
     return acceptable_partitions
+
 
 def untangle(transaction):
     acceptable_partitions = get_acceptable_partitions(transaction)
     return acceptable_partitions
+
 
 def transactions_from_partitions(transaction, partitions):
     transactions = []
@@ -207,17 +232,20 @@ def transactions_from_partitions(transaction, partitions):
 
     return transactions
 
+
 def func(transaction):
     if transaction.type == 'separable':
 
         partitions = get_acceptable_partitions(transaction)
-        sub_transactions = transactions_from_partitions(transaction, partitions)
+        sub_transactions = transactions_from_partitions(
+            transaction, partitions)
         return sub_transactions
 
     else:
         return [transaction]
 
 # --- transaction simplification ---
+
 
 def consolodate_same_addresses(transaction):
     # consolodate input addresses
@@ -252,7 +280,7 @@ def consolodate_same_addresses(transaction):
 
                 elif output[1] > input[1]:
                     new_output = (output[0], output[1] - input[1])
-                    
+
                     inputs_to_remove.append(input)
                     transaction.outputs[j] = new_output
 
@@ -262,17 +290,21 @@ def consolodate_same_addresses(transaction):
                     transaction.inputs[i] = new_input
                     outputs_to_remove.append(output)
 
-    transaction.inputs = [input for input in transaction.inputs if not input in inputs_to_remove]
-    transaction.outputs = [output for output in transaction.outputs if not output in outputs_to_remove]
+    transaction.inputs = [
+        input for input in transaction.inputs if input not in inputs_to_remove]
+    transaction.outputs = [
+        output for output in transaction.outputs if output not in outputs_to_remove]
 
     return transaction
+
 
 def sort_key(input):
     return input[1]
 
+
 def remove_small_inputs(transaction):
     transaction.inputs.sort(key=sort_key)
-    
+
     inputs_to_remove = []
     for input in transaction.inputs:
         if input[1] <= transaction.fee:
@@ -281,14 +313,18 @@ def remove_small_inputs(transaction):
         else:
             break
 
-    transaction.inputs = [x for x in transaction.inputs if not x in inputs_to_remove]
+    transaction.inputs = [
+        x for x in transaction.inputs if x not in inputs_to_remove]
     return transaction
 
 # small output removal criteria from "Shared Send Untangling in Bitcoin"
+
+
 def remove_small_outputs(transaction):
     acceptable_partitions = get_acceptable_partitions(transaction)
 
-    # find the largets minimum change in value from inputs to outputs over all subsets from all partitions
+    # find the largets minimum change in value from inputs to outputs over all
+    # subsets from all partitions
     delta = 0
     for partition in acceptable_partitions:
         input_partition = partition[0]
@@ -298,16 +334,19 @@ def remove_small_outputs(transaction):
         input_subset = input_partition[0]
         output_subset = output_partition[0]
 
-        # find the smallest net change in value from inputs to outputs over all subsets in the partition
-        min_flow = sum([input[1] for input in input_subset]) - sum([output[1] for output in output_subset])
+        # find the smallest net change in value from inputs to outputs over all
+        # subsets in the partition
+        min_flow = sum([input[1] for input in input_subset]) - \
+            sum([output[1] for output in output_subset])
         for i in range(1, partition_size):
             input_subset = input_partition[i]
             output_subset = output_partition[i]
 
-            flow = sum([input[1] for input in input_subset]) - sum([output[1] for output in output_subset])
+            flow = sum([input[1] for input in input_subset]) - \
+                sum([output[1] for output in output_subset])
             if flow < min_flow:
                 min_flow = flow
-        
+
         if min_flow > delta:
             delta = min_flow
 
@@ -321,13 +360,15 @@ def remove_small_outputs(transaction):
         else:
             break
 
-    transaction.outputs = [x for x in transaction.outputs if not x in outputs_to_remove]
+    transaction.outputs = [
+        x for x in transaction.outputs if x not in outputs_to_remove]
     return transaction
 
+
 def simplify_transaction(transaction):
-    if (    len(transaction.inputs) != 1 
-        and len(transaction.outputs) != 1
-        and transaction.type != 'intractable'):
+    if (len(transaction.inputs) != 1
+            and len(transaction.outputs) != 1
+            and transaction.type != 'intractable'):
 
         old_num_inputs = len(transaction.inputs)
         old_num_outputs = len(transaction.outputs)
@@ -336,8 +377,11 @@ def simplify_transaction(transaction):
         transaction = remove_small_inputs(transaction)
 
         # at this state some transactions will have zero inputs or zero outputs
-        # the remove_small_outputs function does not handle these transactions well, so they are skipped
-        if not len(transaction.inputs) == 0 and not len(transaction.outputs) == 0:
+        # the remove_small_outputs function does not handle these transactions
+        # well, so they are skipped
+        if not len(
+                transaction.inputs) == 0 and not len(
+                transaction.outputs) == 0:
             transaction = remove_small_outputs(transaction)
 
         new_num_inputs = len(transaction.inputs)
@@ -350,36 +394,38 @@ def simplify_transaction(transaction):
 
 # --- transaction classification ---
 
+
 def classify_transaction(transaction):
     try:
         if transaction.type == 'unclassified':
 
-                TX_SIZE_LIMIT = 8
-                if transaction.inputs == [('coinbase','')]:
-                    transaction.type = 'simple'
+            TX_SIZE_LIMIT = 8
+            if transaction.inputs == [('coinbase', '')]:
+                transaction.type = 'simple'
 
-                elif len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
-                    transaction.type = 'simple'
+            elif len(transaction.inputs) == 1 or len(transaction.outputs) == 1:
+                transaction.type = 'simple'
 
-                elif len(transaction.inputs) >= TX_SIZE_LIMIT or len(transaction.outputs) >= TX_SIZE_LIMIT:
-                    transaction.type = 'intractable'
+            elif len(transaction.inputs) >= TX_SIZE_LIMIT or len(transaction.outputs) >= TX_SIZE_LIMIT:
+                transaction.type = 'intractable'
 
-                else:
-                    partitions = untangle(transaction)
-                    num_partitions = len(partitions)
-                    if partitions:
-                        if num_partitions == 1:
-                            transaction.type = 'separable'
-                        else:
-                            transaction.type = 'ambiguous'
+            else:
+                partitions = untangle(transaction)
+                num_partitions = len(partitions)
+                if partitions:
+                    if num_partitions == 1:
+                        transaction.type = 'separable'
                     else:
-                        transaction.type = 'simple'
-    except:
+                        transaction.type = 'ambiguous'
+                else:
+                    transaction.type = 'simple'
+    except BaseException:
         print(f'        failed to simplify transaction {transaction.hash}')
 
     return transaction
 
 # --- misc ---
+
 
 def profile_transactions(transactions):
     type_dict = {

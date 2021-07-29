@@ -3,11 +3,11 @@ from itertools import permutations
 import multiprocessing as mp
 import os
 
-from transaction import Transaction
 from functions import get_file_names_regex, load_transactions_from_csv, func, classify_transaction, profile_transactions
 
+
 def untangle_transactions(data_io_directory, file_pattern):
-    global indent # used for output formatting
+    global indent  # used for output formatting
 
     program_start = perf_counter()
 
@@ -30,7 +30,8 @@ def untangle_transactions(data_io_directory, file_pattern):
         print(f'{indent}processing file simplified_transactions/{file_name}:\n')
 
         print(f'{indent}    loading transactions... ', end='', flush=True)
-        transactions = load_transactions_from_csv(f'{input_directory}/{file_name}')
+        transactions = load_transactions_from_csv(
+            f'{input_directory}/{file_name}')
         print('done')
 
         tx_summary = profile_transactions(transactions)
@@ -40,13 +41,17 @@ def untangle_transactions(data_io_directory, file_pattern):
 
         print(f'{indent}    untangling transactions... ', end='', flush=True)
         untangled_txs = pool.map(func, transactions)
-        # untangled_txs will contain sublists, so it needs to be flattened before proceding
+        # untangled_txs will contain sublists, so it needs to be flattened
+        # before proceding
         untangled_txs = [item for sublist in untangled_txs for item in sublist]
         print('done')
 
         # new transactions produced by untangling will have a unknown classification
         # so they need to be reclassified
-        print(f'{indent}    reclassifying untangled transactions... ', end='', flush=True)
+        print(
+            f'{indent}    reclassifying untangled transactions... ',
+            end='',
+            flush=True)
         for index, tx in enumerate(untangled_txs):
             if tx.type == 'unclassified':
                 untangled_txs[index] = classify_transaction(tx)
@@ -56,12 +61,13 @@ def untangle_transactions(data_io_directory, file_pattern):
         for (key, val) in tx_summary.items():
             print(f'{indent}        {key:>14}: {val:,}')
         print()
-        
+
         print(f'{indent}    writing new csv file... ', end='', flush=True)
         with open(f'{output_directory}/{file_name}', 'w') as output_file:
 
-            output_file.write('transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
-            
+            output_file.write(
+                'transaction_hash,num_inputs,input_addresses,input_values,num_outputs,output_addresses,output_values,transaction_fee,transaction_class\n')
+
             for transaction in untangled_txs:
                 output_file.write(transaction.to_csv_string())
         print('done')
@@ -71,6 +77,7 @@ def untangle_transactions(data_io_directory, file_pattern):
 
     program_end = perf_counter()
     print(f'{indent}execution finished in {program_end - program_start:.2f}s')
+
 
 indent = ''
 if __name__ != '__main__':

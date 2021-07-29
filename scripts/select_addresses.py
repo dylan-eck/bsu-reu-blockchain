@@ -3,8 +3,9 @@ import networkx as nx
 import random
 import os
 
+
 def select_addresses(data_io_directory, graph_name):
-    global indent # used for output formatting
+    global indent  # used for output formatting
 
     start = perf_counter()
 
@@ -26,10 +27,11 @@ def select_addresses(data_io_directory, graph_name):
         if address_graph.nodes[node]['in_mtm']:
             mtm_addrs.append(node)
 
-    # using the above set of addresess, find all neighbors that are not involved in any many-to-many transactions
+    # using the above set of addresess, find all neighbors that are not
+    # involved in any many-to-many transactions
     for address in mtm_addrs:
         if len(address_graph.adj[address]) > 0:
-            for neighbor in address_graph.adj[address]: 
+            for neighbor in address_graph.adj[address]:
                 if not address_graph.nodes[neighbor]['in_mtm']:
                     selected_addresses.append(neighbor)
 
@@ -42,7 +44,7 @@ def select_addresses(data_io_directory, graph_name):
     with open(f'{data_io_directory}/selected_addresses.csv', 'w') as output_file:
 
         output_file.write('address')
-        
+
         for address in selected_addresses:
             output_file.write(f'\n{address}')
     print('done')
@@ -50,10 +52,11 @@ def select_addresses(data_io_directory, graph_name):
     end = perf_counter()
     print(f'{indent}finished in {end - start:.2f}s\n')
 
+
 indent = ''
 if __name__ != '__main__':
     indent = '    '
 
 if __name__ == '__main__':
     d = '../data_out'
-    select_addresses(d,f'{d}/address_graph.pickle')
+    select_addresses(d, f'{d}/address_graph.pickle')

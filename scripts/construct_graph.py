@@ -6,6 +6,7 @@ import networkx as nx
 
 from functions import get_file_names_regex, load_transactions_from_csv, profile_transactions
 
+
 def load_clusters(cluster_file_path):
     cluster_dict = {}
     with open(cluster_file_path, 'r') as input_file:
@@ -21,12 +22,13 @@ def load_clusters(cluster_file_path):
 
             else:
                 cluster_dict[address] = cluster
-        
+
     return cluster_dict
+
 
 def link_cluster_addresses_isolated(cluster_dict, transaction):
     edges = []
-    
+
     input_addresses = [input[0] for input in transaction.inputs]
     output_addresses = [output[0] for output in transaction.outputs]
 
@@ -53,7 +55,12 @@ def link_cluster_addresses_isolated(cluster_dict, transaction):
 
     return edges
 
-def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None, linked=False):
+
+def get_nodes_and_edges(
+        transaction,
+        with_clusters=False,
+        cluster_dict=None,
+        linked=False):
     nodes = []
     edges = []
 
@@ -63,29 +70,30 @@ def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None, lin
     num_inputs = len(input_addresses)
     num_outputs = len(output_addresses)
 
-    # add nodes to graph, keeping track of whether or not they are involved in any many-to-many transactions
+    # add nodes to graph, keeping track of whether or not they are involved in
+    # any many-to-many transactions
     if num_inputs == 1 or num_outputs == 1:
         for i in input_addresses:
             for j in output_addresses:
 
-                if not i in nodes:
+                if i not in nodes:
                     nodes.append((i, {'in_mtm': False}))
 
-                if not j in nodes:
+                if j not in nodes:
                     nodes.append((j, {'in_mtm': False}))
 
-                edges.append((i,j))
+                edges.append((i, j))
 
     else:
         for i in input_addresses:
-            if not i in nodes:
+            if i not in nodes:
                 nodes.append((i, {'in_mtm': True}))
 
             else:
                 nodes[nodes.index(i)] = (i, {'in_mtm': True})
 
         for j in output_addresses:
-            if not j in nodes:
+            if j not in nodes:
                 nodes.append((j, {'in_mtm': True}))
 
             else:
@@ -93,22 +101,33 @@ def get_nodes_and_edges(transaction, with_clusters=False, cluster_dict=None, lin
 
     if with_clusters:
         if linked:
-            # create nodes for clusters and link all addresses in the cluster to the cluster node
+            # create nodes for clusters and link all addresses in the cluster
+            # to the cluster node
             for address in (input_addresses + output_addresses):
                 if address in cluster_dict and cluster_dict[address]:
                     edges.append((address, cluster_dict[address]))
 
         else:
-            # directly connect clustered address, but only if they are in a common transaction
-            cluster_edges = link_cluster_addresses_isolated(cluster_dict, transaction)
+            # directly connect clustered address, but only if they are in a
+            # common transaction
+            cluster_edges = link_cluster_addresses_isolated(
+                cluster_dict, transaction)
             for edge in cluster_edges:
                 edges.append(edge)
 
     return (nodes, edges)
 
-def construct_graph(input_directory, output_directory, file_pattern, graph_name, with_clusters=False, cluster_file_path='', linked=False):
-    global indent # used for output formatting
-    
+
+def construct_graph(
+        input_directory,
+        output_directory,
+        file_pattern,
+        graph_name,
+        with_clusters=False,
+        cluster_file_path='',
+        linked=False):
+    global indent  # used for output formatting
+
     program_start = perf_counter()
 
     # multiprocessing is used to speed up execution time
@@ -116,7 +135,7 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
     pool = mp.Pool(processes=4)
     print(f'{indent}found {threads} available threads')
 
-    print(f'{indent}locating input files... ', end='',flush=True)
+    print(f'{indent}locating input files... ', end='', flush=True)
     csv_file_names = get_file_names_regex(input_directory, file_pattern)
     print('done\n')
 
@@ -129,7 +148,7 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
         cluster_dict = None
 
     graph = nx.Graph()
-    
+
     for file in csv_file_names:
         file_start = perf_counter()
 
@@ -145,7 +164,11 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
         print()
 
         print(f'{indent}    collecting graph edges... ', end='', flush=True)
-        func = partial(get_nodes_and_edges, with_clusters=with_clusters, cluster_dict=cluster_dict, linked=linked)
+        func = partial(
+            get_nodes_and_edges,
+            with_clusters=with_clusters,
+            cluster_dict=cluster_dict,
+            linked=linked)
         results = pool.map(func, transactions)
         print('done')
 
@@ -163,7 +186,7 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
 
         file_end = perf_counter()
         print(f'{indent}    finished in {file_end - file_start:.2f}s\n')
-        
+
     print(f'{indent}writing graph to pickle file... ', end='', flush=True)
     nx.write_gpickle(graph, f'{output_directory}/{graph_name}')
     print('done')
@@ -172,6 +195,7 @@ def construct_graph(input_directory, output_directory, file_pattern, graph_name,
 
     program_end = perf_counter()
     print(f'{indent}execution finished in {program_end-program_start:.2f}s\n')
+
 
 indent = ''
 if __name__ != '__main__':
