@@ -12,8 +12,6 @@ import json
 import re
 import os
 
-from networkx.algorithms.planarity import check_planarity
-
 from transaction import Transaction
 
 
