@@ -35,6 +35,14 @@ if __name__ == '__main__':
         nargs=1,
         help='use clusterd from the specified file during graph construction')
 
+    parser.add_argument(
+        '-s',
+        '-select-addrs',
+        dest='select_addrs',
+        action='store_true',
+        help='perform address selection'
+    )
+
     args = parser.parse_args()
 
     # process command line arguments
@@ -81,23 +89,30 @@ if __name__ == '__main__':
 
     untangle_transactions(io_directory, file_regex_pattern)
 
-    # construct address graph for transaction selection
-    print(f'\n{"":{FILL_CHAR_DASH}<79}')
-    print('constructing address graph for address selection:')
-    print(f'{"":{FILL_CHAR_DASH}<79}\n')
+    if args.select_addrs:
+        # construct address graph for transaction selection
+        print(f'\n{"":{FILL_CHAR_DASH}<79}')
+        print('constructing address graph for address selection:')
+        print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    construct_graph(
-        f'{io_directory}/raw_transactions_classified',
-        io_directory,
-        file_regex_pattern,
-        'selection_graph.pickle')
+        construct_graph(
+            f'{io_directory}/raw_transactions_classified',
+            io_directory,
+            file_regex_pattern,
+            'selection_graph.pickle')
 
-    # select addresses to be used for path finding
-    print(f'\n{"":{FILL_CHAR_DASH}<79}')
-    print('selecting addresses for pathfinding:')
-    print(f'{"":{FILL_CHAR_DASH}<79}\n')
+        # select addresses to be used for path finding
+        print(f'\n{"":{FILL_CHAR_DASH}<79}')
+        print('selecting addresses for pathfinding:')
+        print(f'{"":{FILL_CHAR_DASH}<79}\n')
 
-    select_addresses(io_directory, 'selection_graph.pickle')
+        select_addresses(io_directory, 'selection_graph.pickle')
+
+    else:
+        print(f'\n{"":{FILL_CHAR_DASH}<79}')
+        print('selecting addresses for pathfinding:')
+        print(f'{"":{FILL_CHAR_DASH}<79}\n')
+        print('    using pre-selected addresses')
 
     # construct address graph for path finding
     print(f'\n{"":{FILL_CHAR_DASH}<79}')

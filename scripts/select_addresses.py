@@ -9,11 +9,6 @@ def select_addresses(data_io_directory, graph_name):
 
     start = perf_counter()
 
-    # if a selected addresses file already exists, do not create a new one
-    if os.path.exists(f'{data_io_directory}/selected_addresses.csv'):
-        print(f'{indent}using preselected addresses')
-        return
-
     print(f'{indent}loading graph... ', end='', flush=True)
     address_graph = nx.read_gpickle(f'{data_io_directory}/{graph_name}')
     print('done')
