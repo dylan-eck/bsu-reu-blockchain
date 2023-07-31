@@ -1,4 +1,3 @@
-Blockchain Technology for a Secure Data and Communication Future 
 # 2021 NSF Reasearch Experience for Undergraduates at Boise State University
 
 ## About
